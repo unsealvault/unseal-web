@@ -122,7 +122,7 @@ export function LetterComposer() {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Write what you cannot say today, but must be remembered tomorrow..."
-        className="w-full min-h-[200px] bg-transparent border-0 focus-visible:ring-0 resize-none font-serif text-base sm:text-lg leading-relaxed placeholder:text-muted-foreground/50 p-0"
+        className="w-full min-h-50 bg-transparent border-0 focus-visible:ring-0 resize-none font-serif text-base sm:text-lg leading-relaxed placeholder:text-muted-foreground/50 p-0"
         required
       />
 
