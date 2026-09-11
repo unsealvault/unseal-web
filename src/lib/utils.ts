@@ -1,8 +1,8 @@
 export { cn } from "cn"
 
+// src/lib/utils.ts (এর নিচে যুক্ত করুন)
 export function calculateDeliveryDate(duration: string): string {
   const targetDate = new Date();
-
   switch (duration) {
     case '6_months':
       targetDate.setMonth(targetDate.getMonth() + 6);
@@ -19,6 +19,5 @@ export function calculateDeliveryDate(duration: string): string {
     default:
       targetDate.setFullYear(targetDate.getFullYear() + 1);
   }
-
   return targetDate.toISOString();
 }
