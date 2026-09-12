@@ -2,12 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LockKeyhole, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from './theme-toggle';
+import { AvatarDropdown } from './avatar-dropdown';
+import { useUser } from '@/providers/user.provider';
 
 export function Navbar() {
   const pathname = usePathname();
+  const { user, setUser } = useUser();
+
 
   const navLinks = [
     { label: 'Home', href: '/' },
@@ -15,6 +19,8 @@ export function Navbar() {
     { label: 'Blog', href: '/blog' },
     { label: 'Public Vault', href: '/public-vault' },
   ];
+
+
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 transition-all duration-300">
@@ -75,28 +81,40 @@ export function Navbar() {
 
           {/* ডান পাশের স্ট্যাটাস, থিম টগল এবং অ্যাকশন বাটন */}
           <div className="flex items-center gap-3 sm:gap-4">
-
             <ThemeToggle />
 
-            {/* সাইন ইন বাটন */}
-            <Link
-              href="/login"
-              className="text-md font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 cursor-pointer"
-            >
-              Sign In
-            </Link>
+            {user ? (
+              // Logged in user
+              <AvatarDropdown />
+            ) : (
+              // Guest user
+              <>
+                {/* Log In */}
+                <Link
+                  href="/login"
+                  className="text-md font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1.5 cursor-pointer"
+                >
+                  Log In
+                </Link>
 
-            {/* গেট স্টার্টেড / সাইন আপ বাটন */}
-            <Button 
-              className=" sm:h-11 rounded-full bg-linear-to-r from-[#b91c1c] via-[#dc2626] to-[#b91c1c] px-5 text-[13px] tracking-wider font-semibold text-white shadow-[0_0_20px_rgba(185,28,28,0.25)] dark:shadow-[0_0_25px_rgba(220,38,38,0.35)] transition-all hover:shadow-[0_0_35px_rgba(220,38,38,0.55)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-            >
-              <Link href="/register" className="flex items-center gap-1.5 bg-transparent">
-                <span>Get Started</span>
-                <ChevronRight className="size-4 text-white/80" />
-              </Link>
-            </Button>
-
+                {/* Get Started / Sign Up */}
+                <Button
+                  className="sm:h-11 rounded-full bg-linear-to-r from-[#b91c1c] via-[#dc2626] to-[#b91c1c] px-5 text-[13px] tracking-wider font-semibold text-white shadow-[0_0_20px_rgba(185,28,28,0.25)] dark:shadow-[0_0_25px_rgba(220,38,38,0.35)] transition-all hover:shadow-[0_0_35px_rgba(220,38,38,0.55)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  <Link
+                    href="/register"
+                    className="flex items-center gap-1.5 bg-transparent"
+                  >
+                    <span> Track Your Seals </span>
+                    <ChevronRight className="size-4 text-white/80" />
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
+
+
+
         </div>
       </div>
     </header>

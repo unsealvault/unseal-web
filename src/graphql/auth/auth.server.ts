@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { apolloServer } from "../../lib/apollo-server";
 import { GET_ME } from "../auth/auth";
+import { NextRequest } from "next/server";
 
 
 
@@ -19,7 +20,7 @@ type GetMeQuery = {
   } | null;
 };
 
-export async function getCurrentUser() {
+export async function getCurrentUser(request: NextRequest) {
   const client = await apolloServer();
   
   const { data } = await client.query<GetMeQuery>({

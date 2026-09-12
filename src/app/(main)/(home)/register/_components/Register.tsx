@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
-import ReusableForm from '@/components/reuse/ReusableForm';
-import { useUser } from '@/providers/user.provider';
-import { FormInput } from '@/components/reuse/form-input';
+import { useUser } from '@/providers/user.provider'; 
 import { FieldValues, SubmitHandler } from 'react-hook-form';
 import { useRegister } from '@/graphql/hooks/auth.hook';
+import ReusableForm from '@/components/reuse/ReusableForm';
+import { FormInput } from '@/components/reuse/form-input';
 
 const Register = () => {
     const router = useRouter();
