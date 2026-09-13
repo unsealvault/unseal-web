@@ -98,23 +98,30 @@ export function Navbar() {
                 </Link>
 
                 {/* Get Started / Sign Up */}
-                <Button
-                  className="sm:h-11 rounded-full bg-linear-to-r from-[#b91c1c] via-[#dc2626] to-[#b91c1c] px-5 text-[13px] tracking-wider font-semibold text-white shadow-[0_0_20px_rgba(185,28,28,0.25)] dark:shadow-[0_0_25px_rgba(220,38,38,0.35)] transition-all hover:shadow-[0_0_35px_rgba(220,38,38,0.55)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                <Button 
+                  className="relative overflow-hidden sm:h-11 rounded-full bg-linear-to-r from-[#b91c1c] via-[#dc2626] to-[#b91c1c] px-5 text-[13px] tracking-wider font-semibold text-white shadow-[0_0_25px_rgba(220,38,38,0.55)] dark:shadow-[0_0_30px_rgba(220,38,38,0.65)] hover:shadow-[0_0_40px_rgba(239,68,68,0.8)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <Link
                     href="/register"
-                    className="flex items-center gap-1.5 bg-transparent"
+                    className="flex items-center gap-1.5"
                   >
-                    <span> Track Your Seals </span>
-                    <ChevronRight className="size-4 text-white/80" />
+                    {/* অবিরাম চলমান শিমার আলো */}
+                    <span
+                      className="pointer-events-none absolute inset-y-0 w-24 bg-linear-to-r from-transparent via-white/30 to-transparent animate-shimmer-infinite"
+                    />
+
+                    {/* টেক্সট কন্টেন্ট */}
+                    <span className="relative z-10">
+                      Track Your Seals
+                    </span>
+
+                    {/* হোভারে অ্যারো মুভমেন্ট */}
+                    <ChevronRight className="size-4 text-white/90 transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </Button>
               </>
             )}
           </div>
-
-
-
         </div>
       </div>
     </header>

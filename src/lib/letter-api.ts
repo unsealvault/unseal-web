@@ -1,13 +1,17 @@
 // src/lib/letter-api.ts
-export interface SealLetterPayload {
+export interface SealLetterInput {
   recipientEmail: string;
   encryptedContent: string;
   deliverAt: string;
-  audience: 'self' | 'someone_else';
-  visibility: 'private' | 'public_anonymous';
+  audience: string;
+  visibility: string;
   authorName: string;
-  mediaUrls?: string[];
+  images: string[];
+  audio: string[];
+  videos: string[];
+  files: string[];
 }
+
 
 export interface SealLetterResponse {
   id: string;
@@ -28,10 +32,10 @@ const SEAL_LETTER_MUTATION = `
 `;
 
 export async function submitSealedLetter(
-  payload: SealLetterPayload
+  payload: SealLetterInput
 ): Promise<SealLetterResponse> {
   const graphqlEndpoint =
-    process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4000/graphql';
+    process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4001/graphql';
 
   const response = await fetch(graphqlEndpoint, {
     method: 'POST',

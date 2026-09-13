@@ -21,13 +21,13 @@ export default function UnsealHero() {
         />
 
         {/* Ambient Overlays & Gradients */}
-        <div className="absolute inset-0 z-1 bg-gradient-to-b from-[#07080a]/90 via-[#07080a]/80 via-45% lg:via-55% to-[#07080a]/40" />
+        <div className="absolute inset-0 z-1 bg-linear-to-b from-[#07080a]/90 via-[#07080a]/80 via-45% lg:via-55% to-[#07080a]/40" />
         <div className="pointer-events-none absolute inset-x-0 top-0 z-1 h-32 bg-linear-to-b from-[#07080a] to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-36 bg-gradient-to-t from-[#07080a] to-transparent" />
-        <div className="pointer-events-none absolute right-[15%] top-[25%] z-1 h-[350px] w-[350px] rounded-full bg-red-950/25 blur-[140px]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-1 h-36 bg-linear-to-t from-[#07080a] to-transparent" />
+        <div className="pointer-events-none absolute right-[15%] top-[25%] z-1 h-87.5 w-87.5 rounded-full bg-red-950/25 blur-[140px]" />
 
         {/* Main 2-Column Grid */}
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12 py-8">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 lg:px-0 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
             {/* Left Column: Vision & Security Badges */}

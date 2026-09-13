@@ -1,0 +1,103 @@
+'use client';
+
+import React, { useRef } from 'react';
+import { Music, X } from 'lucide-react';
+
+interface AudioFieldProps {
+  files: File[];
+  onChange: (files: File[]) => void;
+  maxFiles?: number;
+}
+
+export default function AudioField({
+  files,
+  onChange,
+  maxFiles = 3,
+}: AudioFieldProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    const selectedFiles = Array.from(e.target.files);
+
+    if (files.length + selectedFiles.length > maxFiles) {
+      alert(`You can add a maximum of ${maxFiles} audio files.`);
+      return;
+    }
+
+    onChange([...files, ...selectedFiles]);
+
+    e.target.value = '';
+  };
+
+  const removeFile = (index: number) => {
+    onChange(files.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50">
+          <Music className="h-5 w-5 text-purple-600" />
+        </div>
+
+        <div>
+          <h4 className="font-medium text-gray-900">
+            Add Music
+          </h4>
+
+          <p className="text-xs text-gray-500">
+            MP3, WAV, M4A • Max {maxFiles}
+          </p>
+        </div>
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="audio/*"
+        multiple
+        className="hidden"
+        onChange={handleSelect}
+      />
+
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="w-full rounded-lg border border-dashed border-gray-300 px-4 py-5 text-sm text-gray-600 transition hover:border-purple-400 hover:bg-purple-50/50"
+      >
+        + Choose Audio
+      </button>
+
+      {files.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {files.map((file, index) => (
+            <div
+              key={`${file.name}-${index}`}
+              className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+            >
+              <div className="min-w-0">
+                <p className="truncate text-sm text-gray-700">
+                  {file.name}
+                </p>
+
+                <p className="text-xs text-gray-400">
+                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => removeFile(index)}
+                className="ml-3 rounded-md p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

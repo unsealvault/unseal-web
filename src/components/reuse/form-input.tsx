@@ -13,6 +13,7 @@ export interface FormInputProps
   error?: string;
   icon?: React.ReactNode;
   containerClassName?: string;
+  helperText?: string;
 }
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(

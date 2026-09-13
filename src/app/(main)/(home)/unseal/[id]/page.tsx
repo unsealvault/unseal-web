@@ -1,16 +1,16 @@
 // src/app/unseal/[id]/page.tsx
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
-import { decryptLetterContent } from '@/lib/crypto';
-import { Sparkles, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { UnsealUnlockCard } from '../_components/unseal-unlock-card';
-import { UnsealMediaViewer } from '../_components/unseal-media-viewer';
-import { ImageLightbox } from '../_components/image-lightbox';
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { decryptLetterContent } from "@/lib/crypto";
+import { Sparkles, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { UnsealUnlockCard } from "../_components/unseal-unlock-card";
+import { UnsealMediaViewer } from "../_components/unseal-media-viewer";
+import { ImageLightbox } from "../_components/image-lightbox";
 
 interface LetterPayload {
   id: string;
@@ -27,11 +27,14 @@ export default function UnsealLetterPage() {
 
   const [loading, setLoading] = useState(true);
   const [letterData, setLetterData] = useState<LetterPayload | null>(null);
-  const [secretKeyInput, setSecretKeyInput] = useState('');
+  const [secretKeyInput, setSecretKeyInput] = useState("");
   const [decryptedMessage, setDecryptedMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<{
+    url: string;
+    type: "image" | "video";
+  } | null>(null);
 
   // ১. ব্যাকএন্ড থেকে ডেটা ফেচ
   useEffect(() => {
@@ -42,22 +45,27 @@ export default function UnsealLetterPage() {
         setLoading(true);
         setError(null);
 
-        const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4001/graphql';
+        const graphqlUrl =
+          process.env.NEXT_PUBLIC_GRAPHQL_URL ||
+          "http://localhost:4001/graphql";
         const res = await fetch(graphqlUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             query: `
               query GetLetter($id: String!) {
-                getLetterById(id: $id) {
-                  id
-                  recipientEmail
-                  status
-                  encryptedContent
-                  mediaUrls
-                  deliverAt
-                }
-              }
+  getLetterById(id: $id) {
+    id
+    recipientEmail
+    status
+    encryptedContent
+    images
+    audio
+    videos
+    files
+    deliverAt
+  }
+}
             `,
             variables: { id: letterId },
           }),
@@ -66,7 +74,9 @@ export default function UnsealLetterPage() {
         const result = await res.json();
 
         if (result.errors && result.errors.length > 0) {
-          setError(result.errors[0]?.message || 'Backend GraphQL error occurred.');
+          setError(
+            result.errors[0]?.message || "Backend GraphQL error occurred.",
+          );
           return;
         }
 
@@ -76,12 +86,14 @@ export default function UnsealLetterPage() {
             ...fetched,
             mediaUrls: fetched.mediaUrls || [],
           });
-          setSecretKeyInput(fetched.recipientEmail || '');
+          setSecretKeyInput(fetched.recipientEmail || "");
         } else {
-          setError('Letter not found in the vault (Invalid ID).');
+          setError("Letter not found in the vault (Invalid ID).");
         }
       } catch (e: any) {
-        setError('Failed to connect to the sealed vault server. Check if port 4001 is running.');
+        setError(
+          "Failed to connect to the sealed vault server. Check if port 4001 is running.",
+        );
       } finally {
         setLoading(false);
       }
@@ -99,19 +111,17 @@ export default function UnsealLetterPage() {
       setError(null);
       const plainText = await decryptLetterContent(
         letterData.encryptedContent,
-        secretKeyInput.trim()
+        secretKeyInput.trim(),
       );
       setDecryptedMessage(plainText);
     } catch (err) {
       console.error(err);
-      setError('Decryption failed! Wrong key or recipient email.');
+      setError("Decryption failed! Wrong key or recipient email.");
     }
   };
 
   return (
     <main className="relative min-h-screen bg-[#07080a] text-foreground flex flex-col justify-between selection:bg-red-900 selection:text-white">
-
-
       {/* pt-28 sm:pt-36 দিয়ে ফিক্সড ন্যাভবারের নিচের নিরাপদ স্পেসিং নিশ্চিত করা হয়েছে */}
       <div className="relative z-10 w-full max-w-2xl mx-auto px-4 pt-28 pb-16 sm:pt-36 sm:pb-24 flex-1 flex flex-col justify-center">
         {loading ? (
@@ -164,9 +174,7 @@ export default function UnsealLetterPage() {
             </div>
 
             {/* আলাদা মিডিয়া কম্পোনেন্ট */}
-            <UnsealMediaViewer
-              mediaUrls={letterData?.mediaUrls || []}
-            />
+            <UnsealMediaViewer mediaUrls={letterData?.mediaUrls || []} />
 
             <div className="pt-4 border-t border-white/10 text-xs text-white/40 flex justify-between items-center font-mono text-[11px]">
               <span>To: {letterData?.recipientEmail}</span>
@@ -181,7 +189,6 @@ export default function UnsealLetterPage() {
         media={selectedMedia}
         onClose={() => setSelectedMedia(null)}
       />
-
     </main>
   );
 }
