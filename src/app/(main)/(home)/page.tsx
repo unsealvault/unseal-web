@@ -2,6 +2,7 @@
 import { FaqSection } from "@/components/faq-accordion"; 
 import UnsealHero from "@/components/hero-banner";
 import { HowItWorks } from "@/components/how-it-works"; 
+import { PricingSection } from "@/components/pricing-section";
 import { PublicVaultTeaser } from "@/components/public-vault-teaser";
 import QuoteBanner from "@/components/quote-banner";
 import ZeroKnowledgeSection from "@/components/zero-knowledge-section";
@@ -16,6 +17,7 @@ export default function HomePage() {
         <PublicVaultTeaser />
         <FaqSection />
         <QuoteBanner /> 
+        <PricingSection/>
       </section>
     </main>
   );

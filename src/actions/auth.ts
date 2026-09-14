@@ -1,9 +1,9 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { apolloServer } from "../../lib/apollo-server";
-import { GET_ME } from "../auth/auth";
 import { NextRequest } from "next/server";
+import { GET_ME } from "@/graphql/auth";
+import { apolloServer } from "@/lib/apollo-server";
 
 
 

@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useUser } from '@/providers/user.provider';
 import { FieldValues, SubmitHandler } from "react-hook-form";
-import { useLogin } from '@/graphql/hooks/auth.hook'; 
 import ReusableForm from '@/components/reuse/ReusableForm';
 import { FormInput } from '@/components/reuse/form-input';
+import { useLogin } from '@/hooks/use-auth';
 
 const LoginPage = () => {
     const router = useRouter();

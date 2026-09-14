@@ -8,3 +8,20 @@ export interface IUser {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface SealLetterData {
+  sealLetter: {
+    id: string;
+    userId: string;
+    recipientEmail: string;
+    encryptedContent: string;
+    deliverAt: string;
+    audience: string;
+    visibility: string;
+    authorName: string;
+    images: string[];
+    audio: string[];
+    videos: string[];
+    files: string[];
+  };
+}

@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { useUser } from '@/providers/user.provider'; 
-import { FieldValues, SubmitHandler } from 'react-hook-form';
-import { useRegister } from '@/graphql/hooks/auth.hook';
+import { FieldValues, SubmitHandler } from 'react-hook-form'; 
 import ReusableForm from '@/components/reuse/ReusableForm';
 import { FormInput } from '@/components/reuse/form-input';
+import { useRegister } from '@/hooks/use-auth';
 
 const Register = () => {
     const router = useRouter();

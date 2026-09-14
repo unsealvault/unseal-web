@@ -21,16 +21,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import { useUser } from '@/providers/user.provider';
-import { usePathname, useRouter } from 'next/navigation';
-import { logout } from '@/graphql/auth/auth.server';
+import { usePathname, useRouter } from 'next/navigation'; 
 import { protectedRoutes } from '@/constant';
+import { logout } from '@/actions/auth';
 
 
 export function AvatarDropdown() {
 
   const { user, setUser } = useUser();
 
-  console.log("NavDropdownMenu:", user);
+  // console.log("NavDropdownMenu:", user);
 
   const initials = user?.name
     .split(' ')

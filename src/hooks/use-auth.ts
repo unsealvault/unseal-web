@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';   
-import { useQuery } from "@apollo/client/react";
-import { GET_ME, loginUser, registerUser } from '../auth/auth';
+import { useQuery } from "@apollo/client/react"; 
 import { IUser } from '@/types'; 
+import { GET_ME, loginUser, registerUser } from '@/graphql/auth';
 
 
 export const useRegister = () => {
@@ -43,7 +43,7 @@ export const useLogin = () => {
     
     try {
       const result = await loginUser(email, password); 
-      console.log("Login result:", result.login.message);
+      // console.log("Login result:", result.login.message);
       toast.success(result?.login?.message,);
       return result; 
     } catch (err: any) {
@@ -60,7 +60,7 @@ export const useLogin = () => {
 
 
 
-export const getCurrentUser = () => {
+export const useGetCurrentUser = () => {
   const { data, loading, error, refetch } = useQuery<{ me: IUser }>(GET_ME,{
     fetchPolicy: "network-only", 
   });

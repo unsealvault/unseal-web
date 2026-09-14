@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getCurrentUser } from "./graphql/auth/auth.server";
+import { getCurrentUser } from "./actions/auth";
 
 const AuthRoutes = ["/login", "/register", "/forgot-password"];
 

@@ -1,13 +1,11 @@
 // app/page.tsx
 import { Badge } from '@/components/ui/badge';
 import { LockKeyhole, ShieldCheck, Clock3 } from 'lucide-react';
-import { Navbar } from '@/components/navbar';
-import { CapsuleForm } from '@/components/capsule-form';
+import { CapsuleForm } from '@/components/form/capsule-form';
 
 export default function UnsealHero() {
   return (
-    <main className="min-h-screen bg-[#07080a] text-[#fbf8f3] selection:bg-[#991b1b]/30 selection:text-rose-200">
-      <Navbar />
+    <main className="min-h-screen bg-[#07080a] text-[#fbf8f3] selection:bg-[#991b1b]/30 selection:text-rose-200"> 
 
       {/* Hero Banner Section */}
       <section className="relative min-h-screen w-full overflow-hidden flex items-center pt-24 pb-16">

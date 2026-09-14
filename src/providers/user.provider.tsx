@@ -7,8 +7,8 @@ import {
   useEffect,
   useState,
 } from "react";
-import { IUser } from "../types";
-import { getCurrentUser } from "../graphql/hooks/auth.hook";
+import { IUser } from "../types"; 
+import { useGetCurrentUser } from "@/hooks/use-auth";
 
 interface IUserProviderValues {
   name: string;
@@ -24,7 +24,7 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<IUser | null>(null);
 
   // get user from graphql hook
-  const { user: currentUser, isLoading, refetchMe } = getCurrentUser();
+  const { user: currentUser, isLoading, refetchMe } = useGetCurrentUser();
 
   useEffect(() => {
     // 1. isLoading end & user data exists (logged in)

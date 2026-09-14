@@ -38,7 +38,12 @@ export function DeliverySettings({
             Unseal after
           </label>
 
-          <Select value={duration} onValueChange={onDurationChange}>
+          <Select
+            value={duration}
+            onValueChange={(value) => {
+              if (value !== null) onDurationChange(value);
+            }}
+          >
             <SelectTrigger
               style={{ height: '44px' }}
               className="w-full rounded-lg bg-white/5 border border-white/10 px-3 text-xs text-white flex items-center justify-between box-border focus:ring-1 focus:ring-[#991b1b] focus:border-[#991b1b]"

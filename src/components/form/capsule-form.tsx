@@ -6,59 +6,55 @@ import imageCompression from 'browser-image-compression';
 import { LetterComposer } from '@/components/form/letter-composer';
 import { SuccessCard } from '@/components/success-card';
 import { SealingOverlay } from '@/components/form/sealing-overlay';
-import ReusableForm from './reuse/ReusableForm';
-import { CapsuleError } from './capsule/capsule-error';
-import { SealButton } from './capsule/seal-button';
+import ReusableForm from '../reuse/ReusableForm';
+import { CapsuleError } from '../capsule/capsule-error';
+import { SealButton } from '../capsule/seal-button';
 
 import {
   encryptLetterContent,
   PUBLIC_VAULT_KEY,
 } from '@/lib/crypto';
 
-import { calculateDeliveryDate } from '@/lib/utils';
-import { submitSealedLetter } from '@/lib/letter-api';
+import { calculateDeliveryDate } from '@/lib/utils'; 
 import { uploadFiles } from '@/lib/uploadthing';
-import { AudienceSwitcher } from './form/audience-switcher';
-import { PrivacySetting } from './form/privacy-settings';
-import { DeliverySettings } from './form/delivery-settings';
-import { MediaUploader } from './capsule/media-uploader';
+import { AudienceSwitcher } from './audience-switcher';
+import { PrivacySetting } from './privacy-settings';
+import { DeliverySettings } from './delivery-settings';
+import { MediaUploader } from '../capsule/media-uploader';
+import { useUser } from '@/providers/user.provider'; 
+import { useSealLetter } from '@/hooks/use-letter';
 
 export function CapsuleForm() {
+  const { user } = useUser();
+  console.log("user", user?._id)
+
+  const currentUser = user?._id;
+
+  // console.log("currentUser id", currentUser)
   // ==========================================
   // STATE
   // ==========================================
 
-  const [audience, setAudience] = useState<
-    'self' | 'someone_else'
-  >('self');
-
-  const [visibility, setVisibility] = useState<
-    'private' | 'public_anonymous'
-  >('private');
-
+  const [audience, setAudience] = useState<'self' | 'someone_else'>('self');
+  const [visibility, setVisibility] = useState<'private' | 'public_anonymous'>('private');
   const [authorName, setAuthorName] = useState('');
   const [content, setContent] = useState('');
   const [email, setEmail] = useState('');
   const [duration, setDuration] = useState('1_year');
   const [customDate, setCustomDate] = useState('');
-
-  const [attachedFiles, setAttachedFiles] = useState<File[]>(
-    []
-  );
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
   const [isSealing, setIsSealing] = useState(false);
   const [isSealed, setIsSealed] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<
-    string | null
-  >(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { sealLetter } = useSealLetter();
 
   // ==========================================
   // FORM VALIDATION
   // ==========================================
 
   const isDateValid =
-    duration !== 'custom' ||
-    customDate.trim().length > 0;
+    duration !== 'custom' || customDate.trim().length > 0;
 
   const isFormValid =
     content.trim().length > 0 &&
@@ -66,10 +62,10 @@ export function CapsuleForm() {
     isDateValid;
 
   // ==========================================
-  // SEAL LETTER
+  // SEAL LETTER (COMPRESSION + UPLOAD)
   // ==========================================
 
-  const handleSeal = async () => {
+const handleSeal = async () => {
     if (!isFormValid) {
       return;
     }
@@ -79,25 +75,47 @@ export function CapsuleForm() {
 
     try {
       // ======================================
-      // 1. UPLOAD & CATEGORIZE FILES
+      // 1. COMPRESS IMAGES IN BROWSER
       // ======================================
+      const compressionOptions = {
+        maxSizeMB: 0.4,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
 
+      const preparedFiles = await Promise.all(
+        attachedFiles.map(async (file) => {
+          if (file.type.startsWith('image/')) {
+            try {
+              const compressedBlob = await imageCompression(file, compressionOptions);
+              return new File([compressedBlob], file.name, {
+                type: file.type,
+                lastModified: Date.now(),
+              });
+            } catch (err) {
+              console.warn('Image compression fallback:', err);
+              return file;
+            }
+          }
+          return file;
+        })
+      );
+
+      // ======================================
+      // 2. UPLOAD & CATEGORIZE FILES
+      // ======================================
       const images: string[] = [];
       const audio: string[] = [];
       const videos: string[] = [];
       const files: string[] = [];
 
-      if (attachedFiles.length > 0) {
-        const uploadRes = await uploadFiles(
-          'letterAttachment',
-          {
-            files: attachedFiles,
-          }
-        );
+      if (preparedFiles.length > 0) {
+        const uploadRes = await uploadFiles('letterAttachment', {
+          files: preparedFiles,
+        });
 
-        // আপলোড হওয়া ফাইলগুলোর অরিজিনাল টাইপ মিলিয়ে নির্দিষ্ট ক্যাটাগরিতে ভাগ করা
-        uploadRes.forEach((uploaded: { url: string; name?: string }, index: number) => {
-          const originalFile = attachedFiles[index];
+        uploadRes.forEach((uploaded: { url: string }, index: number) => {
+          const originalFile = preparedFiles[index];
           const fileType = originalFile?.type || '';
 
           if (fileType.startsWith('image/')) {
@@ -113,74 +131,62 @@ export function CapsuleForm() {
       }
 
       // ======================================
-      // 2. ENCRYPT LETTER CONTENT
+      // 3. ENCRYPT LETTER CONTENT
       // ======================================
-
       const encryptionKey =
         visibility === 'public_anonymous'
           ? PUBLIC_VAULT_KEY
           : email.trim();
 
-      const encryptedBase64 =
-        await encryptLetterContent(
-          content,
-          encryptionKey
-        );
+      const encryptedBase64 = await encryptLetterContent(
+        content,
+        encryptionKey
+      );
 
       // ======================================
-      // 3. CALCULATE DELIVERY DATE
+      // 4. CALCULATE DELIVERY DATE
       // ======================================
-
       let deliverAt: string;
 
       if (duration === 'custom') {
-        deliverAt = new Date(
-          `${customDate}T00:00:00.000Z`
-        ).toISOString();
+        deliverAt = new Date(`${customDate}T00:00:00.000Z`).toISOString();
       } else {
-        deliverAt =
-          calculateDeliveryDate(duration);
+        deliverAt = calculateDeliveryDate(duration);
       }
 
       // ======================================
-      // 4. SUBMIT TO BACKEND (DATABASE)
+      // 5. SUBMIT TO BACKEND (DATABASE)
       // ======================================
-
-      const saveSealLetter = await submitSealedLetter({
+      // ✅ হুক থেকে পাওয়া ফাংশনটি await দিয়ে কল করা হয়েছে এবং ব্যাকএন্ডের হুবহু স্কিমা অনুযায়ী ডেটা পাঠানো হয়েছে
+      const saveSealLetter = await sealLetter({
+        userId: currentUser,
         recipientEmail: email.trim(),
         encryptedContent: encryptedBase64,
         deliverAt,
         audience,
         visibility,
         authorName: authorName.trim() || 'Anonymous',
-        // নতুন ৪টি ক্যাটাগরি ফিল্ড
         images,
         audio,
         videos,
         files,
       });
 
-      console.log('Seal Letter:', saveSealLetter);
+      console.log('Letter Sealed Successfully:', saveSealLetter);
 
       // ======================================
-      // 5. SHOW SUCCESS
+      // 6. SHOW SUCCESS CARD
       // ======================================
-
       setTimeout(() => {
         setIsSealing(false);
         setIsSealed(true);
-      }, 1400);
+      }, 1200);
+
     } catch (error: any) {
-      console.error(
-        'Failed to seal capsule:',
-        error
-      );
-
+      console.error('Failed to seal capsule:', error);
       setErrorMessage(
-        error?.message ||
-        'Error uploading files or connecting to vault.'
+        error?.message || 'Error uploading files or connecting to vault.'
       );
-
       setIsSealing(false);
     }
   };
@@ -198,7 +204,6 @@ export function CapsuleForm() {
     setAttachedFiles([]);
     setErrorMessage(null);
 
-    // Reset options
     setAudience('self');
     setVisibility('private');
     setDuration('1_year');
