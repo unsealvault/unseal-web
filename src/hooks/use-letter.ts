@@ -1,14 +1,13 @@
 "use client";
 
- 
-import { SEAL_LETTER_MUTATION } from "@/graphql/letter";
-import { SealLetterData } from "@/types";
-import { useMutation } from "@apollo/client/react";
+import { GET_MY_LETTERS_QUERY, SEAL_LETTER_MUTATION } from "@/graphql/letter";
+import { SealLetterData, UserLetter } from "@/types";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { toast } from "sonner"; 
 
 
 export const useSealLetter = () => {
-  // 👈 এখানে <SealLetterData, any> যোগ করুন
+
   const [sealLetterMutation, { loading: isLoading }] = useMutation<SealLetterData, any>(
     SEAL_LETTER_MUTATION
   );
@@ -19,7 +18,6 @@ export const useSealLetter = () => {
         variables: { input: inputData },
       });
 
-      // ✅ এবার TypeScript চিনতে পারবে এবং এরর চলে যাবে
       const letter = response.data?.sealLetter;
 
         console.log("............",letter)
@@ -36,4 +34,24 @@ export const useSealLetter = () => {
   };
 
   return { sealLetter, isLoading };
+};
+
+interface MyLettersData {
+  myLetters: UserLetter[];
+}
+
+export const useMyLetters = () => {
+  const { data, loading, error, refetch } = useQuery<MyLettersData>(
+    GET_MY_LETTERS_QUERY,
+    {
+      fetchPolicy: 'cache-and-network',
+    }
+  );
+
+  return {
+    letters: data?.myLetters ?? [],
+    isLoading: loading,
+    error: error?.message || null,
+    refetch,
+  };
 };

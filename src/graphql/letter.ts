@@ -1,4 +1,3 @@
-import { graphqlRequest } from "@/lib/gqlClient";
 import { gql } from "@apollo/client";
 
 
@@ -21,17 +20,22 @@ export const SEAL_LETTER_MUTATION = gql`
 `;
 
 
-export interface SealLetterInput {
-  userId: string;
-  recipientEmail: string;
-  encryptedContent: string;
-  deliverAt: string;
-  audience?: 'self' | 'someone_else';
-  visibility?: 'private' | 'public_anonymous';
-  authorName?: string;
-  images?: string[];
-  audio?: string[];
-  videos?: string[];
-  files?: string[];
-}
-
+export const GET_MY_LETTERS_QUERY = gql`
+  query GetMyVaultLetters {
+    myLetters {
+      _id
+      recipientEmail
+      encryptedContent
+      status
+      deliverAt
+      createdAt
+      audience
+      visibility
+      authorName
+      images
+      audio
+      videos
+      files
+    }
+  }
+`;

@@ -11,7 +11,7 @@ export interface IUser {
 
 export interface SealLetterData {
   sealLetter: {
-    id: string;
+    _id: string;
     userId: string;
     recipientEmail: string;
     encryptedContent: string;
@@ -24,4 +24,37 @@ export interface SealLetterData {
     videos: string[];
     files: string[];
   };
+}
+
+export interface UserLetter {
+  _id: string;
+  recipientEmail: string;
+  encryptedContent: string;
+  status: string;
+  deliverAt: string;
+  createdAt: string;
+  audience?: string;
+  visibility?: string;
+  authorName?: string;
+  images?: string[];
+  audio?: string[];
+  videos?: string[];
+  files?: string[];
+}
+
+export interface Capsule {
+  _id: string;
+  fingerprint: string;
+  title: string;
+  recipientEmail: string;
+  audience: 'self' | 'someone_else';
+  visibility: 'private' | 'public_anonymous';
+  createdAt: string;
+  deliverAt: string;
+  targetTimestamp: number;
+  totalDurationDays: number;
+  remainingDays: number;
+  status: 'locked' | 'unsealed';
+  hasAttachments: boolean;
+  cipherSize: string;
 }
