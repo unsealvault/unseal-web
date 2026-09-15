@@ -1,6 +1,6 @@
 "use client";
 
-import { GET_MY_LETTERS_QUERY, SEAL_LETTER_MUTATION } from "@/graphql/letter";
+import {GET_MY_LETTER_BY_ID, GET_MY_LETTERS_QUERY, GetMyLetterByIdResponse, GetMyLetterByIdVariables, SEAL_LETTER_MUTATION } from "@/graphql/letter";
 import { SealLetterData, UserLetter } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { toast } from "sonner"; 
@@ -20,10 +20,7 @@ export const useSealLetter = () => {
 
       const letter = response.data?.sealLetter;
 
-        console.log("............",letter)
-    //   if (!letter?.id) {
-    //     throw new Error("Failed to seal letter");
-    //   }
+        // console.log("............",letter) 
 
       toast.success("Letter sealed into the vault!");
       return letter;
@@ -55,3 +52,21 @@ export const useMyLetters = () => {
     refetch,
   };
 };
+
+export function useMyLetterById(letterId: string) {
+  const { data, loading, error, refetch } = useQuery<
+    GetMyLetterByIdResponse,
+    GetMyLetterByIdVariables
+  >(GET_MY_LETTER_BY_ID, {
+    variables: { id: letterId },
+    skip: !letterId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  return {
+    singleLetterById: data?.getMyLetterById ?? null,
+    isLoading: loading,
+    error: error ? error.message : null,
+    refetchLetter: refetch,
+  };
+}

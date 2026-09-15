@@ -1,13 +1,25 @@
-// components/pricing-section.tsx
-import { Check, Sparkles, Coffee, ShieldCheck, ArrowRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const PRICING_PLANS = [
+interface PricingPlan {
+  name: string;
+  price: string;
+  frequency: string;
+  description: string;
+  badge: string | null;
+  features: string[];
+  buttonText: string;
+  buttonHref: string;
+  isPrimary: boolean;
+}
+
+const PRICING_PLANS: PricingPlan[] = [
   {
     name: 'Standard Capsule',
     price: '$0',
     frequency: 'Free forever',
-    description: 'Perfect for sending encrypted thoughts and letters to your near future.',
+    description:
+      'Perfect for sending encrypted thoughts and letters to your near future.',
     badge: null,
     features: [
       'Text letters up to 3 years ahead',
@@ -24,7 +36,8 @@ const PRICING_PLANS = [
     name: 'Long-Term Vault Pass',
     price: '$2.99',
     frequency: 'One-time payment',
-    description: 'Lock away memories for life milestones deep into the future.',
+    description:
+      'Lock away memories for life milestones deep into the future.',
     badge: 'Most Popular',
     features: [
       '5 to 10+ years extended scheduling',
@@ -34,7 +47,6 @@ const PRICING_PLANS = [
       'No recurring subscriptions',
     ],
     buttonText: 'Unlock Long-Term Vault',
-    // আপনার Lemon Squeezy প্রোডাক্ট লিংক
     buttonHref: 'https://unseal.lemonsqueezy.com/buy/vault-pass',
     isPrimary: true,
   },
@@ -42,7 +54,8 @@ const PRICING_PLANS = [
     name: 'Patron Supporter',
     price: '$3.00',
     frequency: 'Voluntary gift',
-    description: 'Keep the Unseal zero-knowledge servers running ad-free.',
+    description:
+      'Keep the Unseal zero-knowledge servers running ad-free.',
     badge: 'Community',
     features: [
       'Fuel automated cron runners & email APIs',
@@ -50,91 +63,122 @@ const PRICING_PLANS = [
       'Buy the developer a warm cup of coffee',
     ],
     buttonText: 'Buy Us a Coffee',
-    // আপনার Buy Me a Coffee পেজ লিংক
     buttonHref: 'https://buymeacoffee.com/unseal',
     isPrimary: false,
   },
 ];
 
-export function PricingSection() {
+const PricingSection = () => {
   return (
-    <section className="relative py-20 px-4 max-w-6xl mx-auto">
-      <div className="text-center space-y-3 mb-14">
-        <span className="text-[11px] font-mono tracking-[0.25em] text-[#991b1b] dark:text-rose-400 uppercase font-semibold">
-          Transparent Protocols
-        </span>
-        <h2 className="text-3xl sm:text-4xl font-serif font-normal tracking-tight text-foreground">
-          Honest pricing. No subscriptions.
-        </h2>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Unseal does not sell your personal data or run tracking ads. Our core services remain free, sustained by micro-payments and community backing.
-        </p>
-      </div>
+    <section className="relative w-full overflow-hidden border-t border-border/60 bg-background px-4 py-16 text-foreground transition-colors duration-300 sm:px-6 sm:py-20 md:px-8 lg:px-12 lg:py-24 dark:bg-[#07080a] dark:text-[#fbf8f3]">
+      <div className="pointer-events-none absolute left-1/2 top-24 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-[#991b1b]/5 blur-[120px] dark:bg-red-950/15 sm:h-[400px] sm:w-[400px]" />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-        {PRICING_PLANS.map((plan, index) => (
-          <div
-            key={index}
-            className={`relative flex flex-col justify-between rounded-2xl p-6 sm:p-8 border transition-all ${
-              plan.isPrimary
-                ? 'bg-card border-[#991b1b]/50 shadow-2xl shadow-[#991b1b]/10 dark:shadow-[#991b1b]/20 scale-[1.02]'
-                : 'bg-card/60 border-border hover:border-zinc-500/40 shadow-sm'
-            }`}
-          >
-            {plan.badge && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider font-semibold bg-[#991b1b] text-white shadow-md">
-                {plan.badge}
-              </span>
-            )}
+      <div className="relative z-10 mx-auto max-w-6xl">
+        <div className="mx-auto mb-10 max-w-2xl space-y-3 text-center sm:mb-12 lg:mb-14">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-[#991b1b] dark:text-rose-400 sm:text-[11px] sm:tracking-[0.25em]">
+            Transparent Protocols
+          </span>
 
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-medium text-foreground">{plan.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1 min-h-[32px]">
-                  {plan.description}
-                </p>
-              </div>
+          <h2 className="font-serif text-3xl font-normal tracking-tight text-foreground sm:text-4xl dark:text-[#fbf8f3]">
+            Honest pricing. No subscriptions.
+          </h2>
 
-              <div className="flex items-baseline gap-1.5 pt-2">
-                <span className="text-3xl sm:text-4xl font-serif font-bold text-foreground">
-                  {plan.price}
+          <p className="mx-auto max-w-md text-xs leading-relaxed text-muted-foreground sm:text-sm">
+            Unseal does not sell your personal data or run tracking ads. Our
+            core services remain free, sustained by micro-payments and
+            community backing.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-3 lg:gap-6">
+          {PRICING_PLANS.map((plan) => (
+            <div
+              key={plan.name}
+              className={`relative flex flex-col justify-between rounded-2xl border p-5 transition-all duration-300 sm:p-6 lg:p-7 ${
+                plan.isPrimary
+                  ? 'border-[#991b1b]/50 bg-card shadow-xl shadow-[#991b1b]/10 md:scale-[1.02] dark:border-rose-500/40 dark:shadow-[#991b1b]/20'
+                  : 'border-border bg-card/60 shadow-sm hover:border-zinc-500/40 dark:bg-white/[0.025]'
+              }`}
+            >
+              {plan.badge && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#991b1b] px-3 py-1 text-[9px] font-mono font-semibold uppercase tracking-wider text-white shadow-md">
+                  {plan.badge}
                 </span>
-                <span className="text-xs text-muted-foreground font-mono">
-                  / {plan.frequency}
-                </span>
-              </div>
+              )}
 
-              <div className="h-px bg-border/60 my-4" />
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-base font-medium text-foreground sm:text-lg">
+                    {plan.name}
+                  </h3>
 
-              <ul className="space-y-2.5 text-xs text-muted-foreground">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2">
-                    <Check className="size-3.5 text-emerald-500 shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  <p className="mt-1 min-h-[36px] text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+                    {plan.description}
+                  </p>
+                </div>
 
-            <div className="pt-8 mt-auto">
-              <a href={plan.buttonHref} target={plan.buttonHref.startsWith('http') ? '_blank' : '_self'} rel="noreferrer">
-                <Button
-                  className={`w-full text-xs tracking-wider uppercase font-medium h-10 cursor-pointer ${
-                    plan.isPrimary
-                      ? 'bg-[#991b1b] hover:bg-[#7f1d1d] text-white shadow-md shadow-[#991b1b]/30'
-                      : 'border border-border bg-background text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    <span>{plan.buttonText}</span>
-                    <ArrowRight className="size-3.5" />
+                <div className="flex items-baseline gap-1.5 pt-1">
+                  <span className="font-serif text-3xl font-bold text-foreground sm:text-4xl dark:text-[#fbf8f3]">
+                    {plan.price}
                   </span>
-                </Button>
-              </a>
+
+                  <span className="text-[10px] font-mono text-muted-foreground sm:text-xs">
+                    / {plan.frequency}
+                  </span>
+                </div>
+
+                <div className="my-3 h-px bg-border/60" />
+
+                <ul className="space-y-2.5 text-[11px] text-muted-foreground sm:text-xs">
+                  {plan.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-2 leading-relaxed"
+                    >
+                      <Check className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-7 pt-1">
+                <a
+                  href={plan.buttonHref}
+                  target={plan.buttonHref.startsWith('http') ? '_blank' : '_self'}
+                  rel={
+                    plan.buttonHref.startsWith('http')
+                      ? 'noopener noreferrer'
+                      : undefined
+                  }
+                  className="block"
+                >
+                  <Button
+                    className={`h-10 w-full cursor-pointer text-[10px] font-medium uppercase tracking-wider transition-all sm:text-xs ${
+                      plan.isPrimary
+                        ? 'bg-[#991b1b] text-white shadow-md shadow-[#991b1b]/30 hover:bg-[#7f1d1d]'
+                        : 'border border-border bg-background text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <span>{plan.buttonText}</span>
+                      <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                    </span>
+                  </Button>
+                </a>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <div className="mt-8 text-center">
+          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground sm:text-[10px]">
+            Secure payments · No recurring charges · Privacy first
+          </p>
+        </div>
       </div>
     </section>
   );
-}
+};
+
+export default PricingSection;

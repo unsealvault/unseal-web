@@ -29,7 +29,7 @@ const principles: Principle[] = [
     tag: 'PRIVACY BY MATHEMATICS',
     title: 'Zero-Knowledge Cryptography',
     description:
-      'We do not ask for your trust; we provide cryptographic proof. Every message is sealed directly inside your web browser with client-side AES-GCM-256 before leaving your machine. We store only ciphertext—no engineer, database admin, or AI scraper can decipher your words[cite: 1, 2].',
+      'We do not ask for your trust; we provide cryptographic proof. Every message is sealed directly inside your web browser with client-side AES-GCM-256 before leaving your machine. We store only ciphertext—no engineer, database admin, or AI scraper can decipher your words.',
   },
   {
     icon: Hourglass,
@@ -50,14 +50,14 @@ const principles: Principle[] = [
     tag: 'RADICAL INTENTIONALITY',
     title: 'A Sanctum for Deliberate Thought',
     description:
-      'Modern internet platforms are designed for the next 24 hours of ephemeral feeds[cite: 2]. Unseal is designed for who you will become three, five, or ten years down the road—a safe harbor for confessions, forgotten promises, and unedited truths[cite: 1, 2].',
+      'Modern internet platforms are designed for the next 24 hours of ephemeral feeds[cite: 2]. Unseal is designed for who you will become three, five, or ten years down the road—a safe harbor for confessions, forgotten promises, and unedited truths.',
   },
 ];
 
 const milestones = [
   { year: '2024', event: 'The Manifesto', detail: 'Conceived as an antidote to ephemeral social feeds and algorithmic surveillance.' },
-  { year: '2025', event: 'Zero-Knowledge Engine', detail: 'Transitioned to browser-native Web Crypto API with zero server-side plaintext custody[cite: 1, 2].' },
-  { year: '2026', event: 'The Public Ledger', detail: 'Decrypted community archives launch, allowing unlocked anonymous reflections to inspire the world[cite: 1, 2].' },
+  { year: '2025', event: 'Zero-Knowledge Engine', detail: 'Transitioned to browser-native Web Crypto API with zero server-side plaintext custody.' },
+  { year: '2026', event: 'The Public Ledger', detail: 'Decrypted community archives launch, allowing unlocked anonymous reflections to inspire the world.' },
 ];
 
 export default function AboutPage() {
@@ -104,7 +104,7 @@ export default function AboutPage() {
                   Every major cloud service today operates on surveillance incentives: your photos are parsed for training machine learning models, your drafts are scanned for advertising affinity, and your private notes sit unencrypted in corporate data warehouses[cite: 2].
                 </p>
                 <p>
-                  Unseal was created under a radically different premise: <strong className="text-foreground font-medium">zero-knowledge architecture</strong>[cite: 1, 2]. We engineered our platform so that even if subpoenaed by authorities, breached by adversaries, or managed by rogue operators, your letters remain mathematically inaccessible until their unlock day arrives[cite: 1, 2].
+                  Unseal was created under a radically different premise: <strong className="text-foreground font-medium">zero-knowledge architecture</strong>. We engineered our platform so that even if subpoenaed by authorities, breached by adversaries, or managed by rogue operators, your letters remain mathematically inaccessible until their unlock day arrives.
                 </p>
               </div>
             </div>
@@ -123,15 +123,15 @@ export default function AboutPage() {
               <div className="pt-4 border-t border-border/60 space-y-2.5 text-xs font-mono">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle2 className="size-4 text-[#991b1b] dark:text-rose-400 shrink-0" />
-                  <span>Client-Side AES-GCM-256 Encryption[cite: 1, 2]</span>
+                  <span>Client-Side AES-GCM-256 Encryption</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle2 className="size-4 text-[#991b1b] dark:text-rose-400 shrink-0" />
-                  <span>No Plaintext Database Storage[cite: 1, 2]</span>
+                  <span>No Plaintext Database Storage</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle2 className="size-4 text-[#991b1b] dark:text-rose-400 shrink-0" />
-                  <span>Deterministic Temporal Cron Delivery[cite: 1]</span>
+                  <span>Deterministic Temporal Cron Delivery</span>
                 </div>
               </div>
             </div>

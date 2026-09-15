@@ -1,458 +1,746 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
+
 import Link from 'next/link';
+
 import {
-    ArrowLeft,
-    Calendar,
-    Clock,
-    Lock,
-    Unlock,
-    Sparkles,
-    Music,
-    Video,
-    FileText,
-    Download,
-    ExternalLink,
-    ShieldCheck,
-    Loader2,
-    AlertCircle,
-    Eye,
-    X,
-    Share2,
-    Check,
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Sparkles,
+  Music,
+  Video,
+  FileText,
+  Download,
+  ExternalLink,
+  ShieldCheck,
+  Loader2,
+  AlertCircle,
+  Eye,
+  X,
+  Share2,
+  Check,
 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { decryptLetterContent, PUBLIC_VAULT_KEY } from '@/lib/crypto';
 
-interface LetterDetail {
-    id: string;
-    recipientEmail: string;
-    status: string;
-    encryptedContent: string;
-    deliverAt: string;
-    createdAt: string;
-    authorName?: string;
-    audience?: string;
-    visibility?: string;
-    images?: string[];
-    audio?: string[];
-    videos?: string[];
-    files?: string[];
-}
+import {
+  decryptLetterContent,
+  PUBLIC_VAULT_KEY,
+} from '@/lib/crypto';
 
-export default function CapsuleDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
+import { useMyLetterById } from '@/hooks/use-letter';
 
-    const [letter, setLetter] = useState<LetterDetail | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export default function CapsuleDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
 
-    const [decryptedText, setDecryptedText] = useState<string>('');
-    const [isDecrypting, setIsDecrypting] = useState<boolean>(true);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [copiedLink, setCopiedLink] = useState(false);
+  const {
+    singleLetterById,
+    isLoading,
+    error,
+  } = useMyLetterById(id) as any;
 
-    // ১. ব্যাকএন্ড GraphQL থেকে নির্দিষ্ট চিঠির সম্পূর্ণ ডেটা ফেচ করা
-    useEffect(() => {
-        async function fetchCapsule() {
-            if (!id) return;
+  const [decryptedText, setDecryptedText] = useState('');
+  const [isDecrypting, setIsDecrypting] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [copiedLink, setCopiedLink] = useState(false);
 
-            try {
-                setLoading(true);
-                setError(null);
+  // ============================================
+  // AUTO DECRYPTION
+  // ============================================
 
-                const graphqlUrl = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4001/graphql';
-                const res = await fetch(graphqlUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        query: `
-              query GetLetter($id: String!) {
-                getLetterById(id: $id) {
-                  id
-                  recipientEmail
-                  status
-                  encryptedContent
-                  deliverAt
-                  createdAt
-                  authorName
-                  audience
-                  visibility
-                  images
-                  audio
-                  videos
-                  files
-                }
-              }
-            `,
-                        variables: { id },
-                    }),
-                });
+  useEffect(() => {
+    if (!singleLetterById?.encryptedContent) return;
 
-                const result = await res.json();
+    let isMounted = true;
 
-                if (result.errors && result.errors.length > 0) {
-                    setError(result.errors[0]?.message || 'GraphQL Query Error');
-                    return;
-                }
+    async function performDecryption() {
+      setIsDecrypting(true);
 
-                if (result.data?.getLetterById) {
-                    setLetter(result.data.getLetterById);
-                } else {
-                    setError('Vault not found with this identifier.');
-                }
-            } catch (err: any) {
-                console.error(err);
-                setError('Failed to connect to the secure vault ledger.');
-            } finally {
-                setLoading(false);
-            }
-        }
+      try {
+        const keyToUse =
+          singleLetterById.visibility === 'public_anonymous'
+            ? PUBLIC_VAULT_KEY
+            : singleLetterById.recipientEmail.trim();
 
-        fetchCapsule();
-    }, [id]);
-
-    // ২. ব্রাউজার মেমোরিতে জিরো-নলেজ ডিক্রিপশন (অটোমেটিক)
-    useEffect(() => {
-        if (!letter) return;
-
-        const currentLetter = letter;
-
-        async function performDecryption() {
-            setIsDecrypting(true);
-            try {
-                const keyToUse =
-                    currentLetter.visibility === 'public_anonymous'
-                        ? PUBLIC_VAULT_KEY
-                        : currentLetter.recipientEmail.trim();
-
-                const plain = await decryptLetterContent(currentLetter.encryptedContent, keyToUse);
-                setDecryptedText(plain);
-            } catch (err) {
-                setDecryptedText(currentLetter.encryptedContent);
-            } finally {
-                setIsDecrypting(false);
-            }
-        }
-
-        performDecryption();
-    }, [letter]);
-
-    // ফাইল নাম বের করার হেল্পার
-    const getFileName = (url: string) => {
-        try {
-            const pathname = new URL(url).pathname;
-            const fileName = pathname.substring(pathname.lastIndexOf('/') + 1);
-            return decodeURIComponent(fileName) || 'attached-document.pdf';
-        } catch {
-            return 'document.pdf';
-        }
-    };
-
-    const copyVaultLink = () => {
-        if (typeof window !== 'undefined') {
-            navigator.clipboard.writeText(window.location.href);
-            setCopiedLink(true);
-            setTimeout(() => setCopiedLink(false), 2000);
-        }
-    };
-
-    // লোডিং স্টেট
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#07080a] flex flex-col items-center justify-center font-mono text-xs text-white/50 space-y-3">
-                <Loader2 className="w-6 h-6 animate-spin text-red-500" />
-                <span className="tracking-widest uppercase">Deciphering capsule from ledger...</span>
-            </div>
+        const plain = await decryptLetterContent(
+          singleLetterById.encryptedContent,
+          keyToUse,
         );
+
+        if (isMounted) {
+          setDecryptedText(plain);
+        }
+      } catch (err) {
+        console.error('Decryption failed:', err);
+
+        if (isMounted) {
+          setDecryptedText(
+            singleLetterById.encryptedContent,
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsDecrypting(false);
+        }
+      }
     }
 
-    // এরর স্টেট
-    if (error || !letter) {
-        return (
-            <div className="min-h-screen bg-[#07080a] flex flex-col items-center justify-center p-6 text-center space-y-4">
-                <div className="p-3 rounded-full bg-red-950/40 border border-red-800/40 text-red-400">
-                    <AlertCircle className="w-6 h-6" />
-                </div>
-                <p className="text-sm font-mono text-red-300 max-w-md">{error || 'Capsule not found.'}</p>
-                <Button variant="outline" className="border-white/10 text-xs font-mono text-white hover:bg-white/5">
-                    <Link href="/dashboard">Back to Dashboard</Link>
-                </Button>
-            </div>
-        );
+    performDecryption();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [singleLetterById]);
+
+  // ============================================
+  // ESC TO CLOSE IMAGE
+  // ============================================
+
+  useEffect(() => {
+    if (!selectedImage) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedImage(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedImage]);
+
+  // ============================================
+  // COPY VAULT LINK
+  // ============================================
+
+  const copyVaultLink = async () => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      await navigator.clipboard.writeText(
+        window.location.href,
+      );
+
+      setCopiedLink(true);
+
+      window.setTimeout(() => {
+        setCopiedLink(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
     }
+  };
 
-    const createdTime = new Date(letter.createdAt).getTime();
-    const targetTime = new Date(letter.deliverAt).getTime();
-    const now = Date.now();
-    const isLocked = targetTime > now;
+  // ============================================
+  // FILE NAME
+  // ============================================
 
-    const totalDays = Math.max(1, Math.ceil((targetTime - createdTime) / (1000 * 60 * 60 * 24)));
-    const remainingDays = Math.max(0, Math.ceil((targetTime - now) / (1000 * 60 * 60 * 24)));
-    const progressPercent = isLocked
-        ? Math.max(5, Math.min(100, Math.round(((totalDays - remainingDays) / totalDays) * 100)))
-        : 100;
+  const getFileName = (url: string) => {
+    try {
+      const pathname = new URL(url).pathname;
 
-    const images = letter?.images || [];
-    const videos = letter?.videos || [];
-    const audios = letter?.audio || [];
-    const files = letter?.files || [];
-    const totalMedia = images.length + videos.length + audios.length + files.length;
+      return (
+        decodeURIComponent(
+          pathname.substring(
+            pathname.lastIndexOf('/') + 1,
+          ),
+        ) || 'document.pdf'
+      );
+    } catch {
+      return 'document.pdf';
+    }
+  };
 
+  // ============================================
+  // LOADING
+  // ============================================
+
+  if (isLoading) {
     return (
-        <>
+      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center gap-3 px-4 text-center text-muted-foreground">
+        <Loader2 className="size-6 animate-spin text-[#991b1b]" />
 
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] sm:text-xs sm:tracking-widest">
+          Deciphering capsule from ledger...
+        </span>
+      </div>
+    );
+  }
 
+  // ============================================
+  // ERROR
+  // ============================================
 
-            <div className="relative z-10 max-w-4xl mx-auto space-y-8">
+  if (error || !singleLetterById) {
+    return (
+      <div className="flex min-h-[60vh] w-full flex-col items-center justify-center px-4 py-8 text-center">
+        <AlertCircle className="mb-3 size-8 text-rose-500" />
 
-                {/* টপ নেভিগেশন ও অ্যাকশন বার */}
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                    <Button asChild variant="ghost" className="text-white/60 hover:text-white text-xs font-mono -ml-3">
-                        <Link href="/dashboard" className="flex items-center gap-2">
-                            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-                        </Link>
-                    </Button>
+        <p className="mb-4 max-w-sm font-mono text-[10px] leading-5 text-rose-400 sm:text-xs">
+          {error || 'Time capsule not found in ledger.'}
+        </p>
 
-                    <div className="flex items-center gap-2.5">
-                        <button
-                            onClick={copyVaultLink}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-white/70 hover:text-white transition-colors cursor-pointer"
-                        >
-                            {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
-                            <span>{copiedLink ? 'Link Copied' : 'Share Vault'}</span>
-                        </button>
+        <Button
+          variant="outline"
+          size="sm" 
+          className="h-8 px-3 text-[10px] font-mono"
+        >
+          <Link href="/dashboard">
+            Return to Dashboard
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 font-mono text-xs">
-                            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                            <span className="text-white/80">AES-GCM-256</span>
-                        </div>
-                    </div>
+  // ============================================
+  // TIME & PROGRESS
+  // ============================================
+
+  const createdTime = new Date(
+    singleLetterById.createdAt,
+  ).getTime();
+
+  const targetTime = new Date(
+    singleLetterById.deliverAt,
+  ).getTime();
+
+  const now = Date.now();
+
+  const isLocked = targetTime > now;
+
+  const totalDays = Math.max(
+    1,
+    Math.ceil(
+      (targetTime - createdTime) /
+        (1000 * 60 * 60 * 24),
+    ),
+  );
+
+  const remainingDays = Math.max(
+    0,
+    Math.ceil(
+      (targetTime - now) /
+        (1000 * 60 * 60 * 24),
+    ),
+  );
+
+  const progressPercent = isLocked
+    ? Math.max(
+        5,
+        Math.min(
+          100,
+          Math.round(
+            ((totalDays - remainingDays) /
+              totalDays) *
+              100,
+          ),
+        ),
+      )
+    : 100;
+
+  const images = singleLetterById.images || [];
+  const videos = singleLetterById.videos || [];
+  const audios = singleLetterById.audio || [];
+  const files = singleLetterById.files || [];
+
+  const totalMedia =
+    images.length +
+    videos.length +
+    audios.length +
+    files.length;
+
+  return (
+    <div className="w-full overflow-x-hidden px-3 sm:py-7 md:px-6 md:py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-4xl space-y-4 sm:space-y-5 md:space-y-6">
+
+        {/* ============================================
+            ACTION BAR
+        ============================================ */}
+
+        <div className="flex w-full flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            variant="ghost"
+            size="sm" 
+            className="-ml-2 h-8 w-fit px-2 text-[10px] font-mono text-muted-foreground hover:bg-muted hover:text-foreground sm:text-xs"
+          >
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5"
+            >
+              <ArrowLeft className="size-3.5 shrink-0" />
+
+              <span>
+                Back to Dashboard
+              </span>
+            </Link>
+          </Button>
+
+          <div className="flex w-full min-w-0 items-center gap-1.5 sm:w-auto sm:gap-2">
+            <button
+              type="button"
+              onClick={copyVaultLink}
+              className="inline-flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-2.5 font-mono text-[9px] text-muted-foreground transition-colors hover:text-foreground sm:flex-none sm:px-3 sm:text-[10px]"
+            >
+              {copiedLink ? (
+                <Check className="size-3 shrink-0 text-emerald-500" />
+              ) : (
+                <Share2 className="size-3 shrink-0" />
+              )}
+
+              <span className="truncate">
+                {copiedLink
+                  ? 'Link Copied'
+                  : 'Share Vault'}
+              </span>
+            </button>
+
+            <div className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 font-mono text-[9px] text-muted-foreground sm:px-3 sm:text-[10px]">
+              <ShieldCheck className="size-3.5 shrink-0 text-emerald-500" />
+
+              <span>AES-GCM-256</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================
+            MAIN CAPSULE
+        ============================================ */}
+
+        <section className="w-full overflow-hidden rounded-xl border border-border bg-card/80 p-3.5 shadow-sm backdrop-blur-xl sm:rounded-2xl sm:p-5 md:p-6 lg:p-7">
+          
+          <div className="w-full space-y-5 sm:space-y-6">
+
+            {/* ========================================
+                CAPSULE HEADER
+            ======================================== */}
+
+            <div className="w-full space-y-3 border-b border-border/60 pb-5">
+
+              {/* STATUS + ID */}
+
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <span
+                  className={`inline-flex w-fit max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[9px] ${
+                    isLocked
+                      ? 'border-amber-500/20 bg-amber-500/10 text-amber-500'
+                      : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500'
+                  }`}
+                >
+                  <span
+                    className={`size-1.5 shrink-0 rounded-full ${
+                      isLocked
+                        ? 'animate-pulse bg-amber-500'
+                        : 'bg-emerald-500'
+                    }`}
+                  />
+
+                  <span className="truncate">
+                    {isLocked
+                      ? 'Immutable Locked'
+                      : 'Delivered & Unsealed'}
+                  </span>
+                </span>
+
+                <span className="max-w-full truncate font-mono text-[8px] text-muted-foreground sm:text-[9px]">
+                  ID: #
+                  {singleLetterById._id
+                    ?.slice(-8)
+                    .toUpperCase()}
+                </span>
+              </div>
+
+              {/* RECIPIENT */}
+
+              <div className="min-w-0">
+                <h1 className="break-all font-serif text-xl font-medium leading-tight text-foreground sm:text-2xl md:text-3xl">
+                  To: {singleLetterById.recipientEmail}
+                </h1>
+
+                <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[9px] text-muted-foreground sm:text-[10px]">
+                  <span className="break-words">
+                    By:{' '}
+                    <span className="text-foreground/80">
+                      {singleLetterById.authorName ||
+                        'Anonymous'}
+                    </span>
+                  </span>
+
+                  <span>•</span>
+
+                  <span className="capitalize">
+                    {singleLetterById.audience ||
+                      'Self'}
+                  </span>
+
+                  <span>•</span>
+
+                  <span className="capitalize">
+                    {(
+                      singleLetterById.visibility ||
+                      'private'
+                    ).replaceAll('_', ' ')}
+                  </span>
+                </div>
+              </div>
+
+              {/* PROGRESS */}
+
+              <div className="w-full space-y-2 pt-1.5">
+
+                <div className="grid w-full grid-cols-1 gap-1.5 font-mono text-[9px] text-muted-foreground sm:grid-cols-3 sm:items-center sm:gap-2 sm:text-[10px]">
+
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <Calendar className="size-3 shrink-0" />
+
+                    <span className="truncate">
+                      Sealed:{' '}
+                      {new Date(
+                        singleLetterById.createdAt,
+                      ).toLocaleDateString()}
+                    </span>
+                  </span>
+
+                  <span className="flex min-w-0 items-center gap-1.5 text-[#991b1b] sm:justify-center dark:text-rose-400">
+                    <Clock className="size-3 shrink-0" />
+
+                    <span className="truncate">
+                      {isLocked
+                        ? `${remainingDays} Days Left`
+                        : 'Unlocked'}
+                    </span>
+                  </span>
+
+                  <span className="flex min-w-0 items-center gap-1.5 sm:justify-end">
+                    <Calendar className="size-3 shrink-0" />
+
+                    <span className="truncate">
+                      Unseals:{' '}
+                      {new Date(
+                        singleLetterById.deliverAt,
+                      ).toLocaleDateString()}
+                    </span>
+                  </span>
+
                 </div>
 
-                {/* মূল ক্যাপসুল কন্টেইনার */}
-                <div className="relative rounded-3xl border border-white/10 bg-[#0c0d12]/80 backdrop-blur-2xl p-6 sm:p-12 shadow-[0_20px_60px_rgba(0,0,0,0.8)] space-y-8">
-
-                    {/* পার্সেল মেটা হেডার */}
-                    <div className="space-y-4 border-b border-white/10 pb-6">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 font-mono text-xs">
-                                <span
-                                    className={`size-2 rounded-full ${isLocked
-                                        ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse'
-                                        : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]'
-                                        }`}
-                                />
-                                <span className={isLocked ? 'text-amber-300' : 'text-emerald-300'}>
-                                    {isLocked ? 'Immutable Sealed Vault' : 'Payload Ready & Delivered'}
-                                </span>
-                            </div>
-
-                            <span className="font-mono text-xs text-white/40">
-                                CAPSULE #{letter.id.slice(-8).toUpperCase()}
-                            </span>
-                        </div>
-
-                        <div>
-                            <h1 className="font-serif text-2xl sm:text-4xl text-[#fbf8f3] tracking-wide">
-                                To: {letter.recipientEmail}
-                            </h1>
-                            <p className="text-xs sm:text-sm font-mono text-white/40 mt-1.5">
-                                Authored by: <span className="text-white/70">{letter.authorName || 'Anonymous'}</span>
-                                {' • '}
-                                Audience: <span className="capitalize text-white/70">{letter.audience || 'Self'}</span>
-                                {' • '}
-                                Visibility: <span className="capitalize text-white/70">{(letter.visibility || 'private').replace('_', ' ')}</span>
-                            </p>
-                        </div>
-
-                        {/* টাইমলাইন প্রগ্রেস স্ট্রিপ */}
-                        <div className="space-y-2 pt-3">
-                            <div className="flex flex-wrap items-center justify-between text-xs font-mono text-white/50 gap-2">
-                                <span className="flex items-center gap-1.5">
-                                    <Calendar className="w-3.5 h-3.5 text-white/40" />
-                                    Sealed: {new Date(letter.createdAt).toLocaleDateString()}
-                                </span>
-                                <span className="flex items-center gap-1.5 text-red-400">
-                                    <Clock className="w-3.5 h-3.5" />
-                                    {isLocked ? `${remainingDays} Days Left (${progressPercent}%)` : 'Delivery Schedule Complete'}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                    <Calendar className="w-3.5 h-3.5 text-white/40" />
-                                    Target: {new Date(letter.deliverAt).toLocaleDateString()}
-                                </span>
-                            </div>
-
-                            <div className="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
-                                <div
-                                    className={`h-full rounded-full transition-all duration-700 ${isLocked ? 'bg-gradient-to-r from-red-800 to-rose-500' : 'bg-emerald-500'
-                                        }`}
-                                    style={{ width: `${progressPercent}%` }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ডিক্রিপ্ট করা মূল চিঠি */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-mono text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <Sparkles className="w-3.5 h-3.5" /> Decrypted Letter Payload
-                            </span>
-                            <span className="text-[11px] font-mono text-white/40">Zero-Knowledge Client Decrypt</span>
-                        </div>
-
-                        {isDecrypting ? (
-                            <div className="space-y-3 p-6 bg-black/40 rounded-2xl border border-white/5 animate-pulse">
-                                <div className="h-4 bg-white/10 rounded w-full" />
-                                <div className="h-4 bg-white/10 rounded w-5/6" />
-                                <div className="h-4 bg-white/10 rounded w-3/4" />
-                            </div>
-                        ) : (
-                            <div className="p-6 sm:p-8 rounded-2xl bg-black/40 border border-white/5 font-serif text-base sm:text-lg leading-relaxed whitespace-pre-wrap text-[#fbf8f3]">
-                                {decryptedText}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* মিডিয়া ও এটাচমেন্টস সেকশন */}
-                    {totalMedia > 0 && (
-                        <div className="space-y-6 pt-6 border-t border-white/10">
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-mono text-xs uppercase tracking-widest text-white/70">
-                                    Attached Media & Documents ({totalMedia})
-                                </h3>
-                            </div>
-
-                            {/* ১. ছবি গ্যালারি */}
-                            {images.length > 0 && (
-                                <div className="space-y-3">
-                                    <span className="text-xs font-mono text-white/40">Images ({images.length})</span>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {images.map((url, idx) => (
-                                            <div
-                                                key={idx}
-                                                onClick={() => setSelectedImage(url)}
-                                                className="group relative aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black cursor-pointer hover:border-red-500/50 transition-all"
-                                            >
-                                                <img src={url} alt={`Memory ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
-                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                                    <Eye className="w-5 h-5 text-white" />
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ২. ভিডিও প্লেয়ার */}
-                            {videos.length > 0 && (
-                                <div className="space-y-3">
-                                    <span className="text-xs font-mono text-white/40">Video Memos ({videos.length})</span>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {videos.map((url, idx) => (
-                                            <div key={idx} className="rounded-2xl overflow-hidden border border-white/10 bg-black">
-                                                <video controls playsInline preload="metadata" className="w-full aspect-video">
-                                                    <source src={url} />
-                                                    Video playback not supported.
-                                                </video>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ৩. অডিও প্লেয়ার */}
-                            {audios.length > 0 && (
-                                <div className="space-y-3">
-                                    <span className="text-xs font-mono text-white/40">Voice Recordings ({audios.length})</span>
-                                    <div className="space-y-2">
-                                        {audios.map((url, idx) => (
-                                            <div key={idx} className="p-3.5 rounded-2xl border border-white/10 bg-white/5 flex items-center gap-3">
-                                                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
-                                                    <Music className="w-4 h-4" />
-                                                </div>
-                                                <audio controls className="w-full h-8 brightness-90">
-                                                    <source src={url} />
-                                                </audio>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ৪. ডকুমেন্টস ও পিডিএফ */}
-                            {files.length > 0 && (
-                                <div className="space-y-3">
-                                    <span className="text-xs font-mono text-white/40">Documents & PDFs ({files.length})</span>
-                                    <div className="space-y-2">
-                                        {files.map((url, idx) => (
-                                            <div key={idx} className="flex items-center justify-between p-3.5 rounded-2xl border border-white/10 bg-white/5 hover:border-white/20 transition-all">
-                                                <div className="flex items-center gap-3 truncate pr-3">
-                                                    <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
-                                                        <FileText className="w-4 h-4" />
-                                                    </div>
-                                                    <span className="font-mono text-xs text-white/80 truncate">{getFileName(url)}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    <a
-                                                        href={url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono text-red-300 flex items-center gap-1.5 transition-colors"
-                                                    >
-                                                        <span>Open</span>
-                                                        <ExternalLink className="w-3 h-3" />
-                                                    </a>
-                                                    <a
-                                                        href={url}
-                                                        download
-                                                        className="p-2 text-white/40 hover:text-white transition-colors"
-                                                        title="Download file"
-                                                    >
-                                                        <Download className="w-4 h-4" />
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
+                <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      isLocked
+                        ? 'bg-[#991b1b]'
+                        : 'bg-emerald-500'
+                    }`}
+                    style={{
+                      width: `${progressPercent}%`,
+                    }}
+                  />
                 </div>
+
+              </div>
             </div>
 
+            {/* ========================================
+                DECRYPTED LETTER
+            ======================================== */}
 
-            {selectedImage && (
-                <div
-                    className="fixed inset-0 z-60 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 select-none animate-in fade-in duration-200 lg:pt-24"
-                    onClick={() => setSelectedImage(null)}
-                >
-                    <div
-                        className="relative max-w-[90vw] max-h-[75vh] flex items-center justify-center overflow-hidden rounded-2xl border border-white/10 shadow-2xl bg-black"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* মূল ছবি */}
-                        <img
-                            src={selectedImage}
-                            alt="Expanded Memory"
-                            className="w-auto h-auto max-w-full max-h-[80vh] object-contain block rounded-2xl"
-                        />
+            <div className="w-full space-y-2.5">
 
-                        <button
-                            type="button"
-                            onClick={() => setSelectedImage(null)}
-                            className="absolute top-3 right-3 z-30 p-2 rounded-full bg-black/70 hover:bg-black text-white/80 hover:text-white border border-white/20 backdrop-blur-md transition-all shadow-lg cursor-pointer"
-                            title="Close image"
-                        >
-                            <X className="w-4 h-4 stroke-[2.5]" />
-                        </button>
-                    </div>
+              <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+                <span className="flex min-w-0 items-center gap-1.5 font-mono text-[9px] text-emerald-500 sm:text-[10px]">
+                  <Sparkles className="size-3.5 shrink-0" />
+
+                  <span className="truncate">
+                    Decrypted Letter Content
+                  </span>
+                </span>
+
+                <span className="font-mono text-[8px] text-muted-foreground sm:text-[9px]">
+                  Zero-Knowledge
+                </span>
+              </div>
+
+              {isDecrypting ? (
+                <div className="w-full animate-pulse space-y-2 rounded-xl border border-border bg-muted/20 p-4 sm:p-5">
+                  <div className="h-3 w-full rounded bg-muted" />
+
+                  <div className="h-3 w-5/6 rounded bg-muted" />
+
+                  <div className="h-3 w-2/3 rounded bg-muted" />
                 </div>
+              ) : (
+                <div className="max-h-[65vh] w-full overflow-x-hidden overflow-y-auto rounded-xl border border-border bg-background p-4 font-serif text-sm leading-7 text-foreground/90 whitespace-pre-wrap break-words sm:p-5 sm:text-base sm:leading-8 md:p-6">
+                  {decryptedText}
+                </div>
+              )}
+
+            </div>
+
+            {/* ========================================
+                MEDIA & DOCUMENTS
+            ======================================== */}
+
+            {totalMedia > 0 && (
+              <div className="w-full space-y-5 border-t border-border/60 pt-5 sm:space-y-6">
+
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground sm:text-[10px]">
+                    Attachments ({totalMedia})
+                  </h3>
+                </div>
+
+                {/* ====================================
+                    IMAGES
+                ==================================== */}
+
+                {images.length > 0 && (
+                  <div className="w-full space-y-2.5">
+
+                    <div className="flex items-center gap-1.5 font-mono text-[9px] text-muted-foreground sm:text-[10px]">
+                      <Eye className="size-3 shrink-0" />
+
+                      <span>
+                        Images ({images.length})
+                      </span>
+                    </div>
+
+                    <div className="grid w-full grid-cols-2 gap-1.5 min-[480px]:gap-2 sm:grid-cols-3 md:grid-cols-4">
+                      {images.map(
+                        (
+                          url: string,
+                          idx: number,
+                        ) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() =>
+                              setSelectedImage(url)
+                            }
+                            className="group relative aspect-square min-w-0 cursor-pointer overflow-hidden rounded-lg border border-border bg-black transition-colors hover:border-[#991b1b]/50 sm:rounded-xl"
+                          >
+                            <img
+                              src={url}
+                              alt={`Attachment ${idx + 1}`}
+                              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                              <Eye className="size-4 text-white" />
+                            </div>
+                          </button>
+                        ),
+                      )}
+                    </div>
+
+                  </div>
+                )}
+
+                {/* ====================================
+                    VIDEOS
+                ==================================== */}
+
+                {videos.length > 0 && (
+                  <div className="w-full space-y-2.5">
+
+                    <div className="flex items-center gap-1.5 font-mono text-[9px] text-muted-foreground sm:text-[10px]">
+                      <Video className="size-3 shrink-0" />
+
+                      <span>
+                        Videos ({videos.length})
+                      </span>
+                    </div>
+
+                    <div className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
+                      {videos.map(
+                        (
+                          url: string,
+                          idx: number,
+                        ) => (
+                          <video
+                            key={idx}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="aspect-video h-auto w-full min-w-0 rounded-lg border border-border bg-black sm:rounded-xl"
+                          >
+                            <source src={url} />
+                            Your browser does not support video playback.
+                          </video>
+                        ),
+                      )}
+                    </div>
+
+                  </div>
+                )}
+
+                {/* ====================================
+                    AUDIO
+                ==================================== */}
+
+                {audios.length > 0 && (
+                  <div className="w-full space-y-2.5">
+
+                    <div className="flex items-center gap-1.5 font-mono text-[9px] text-muted-foreground sm:text-[10px]">
+                      <Music className="size-3 shrink-0" />
+
+                      <span>
+                        Audio ({audios.length})
+                      </span>
+                    </div>
+
+                    <div className="w-full space-y-2">
+                      {audios.map(
+                        (
+                          url: string,
+                          idx: number,
+                        ) => (
+                          <div
+                            key={idx}
+                            className="flex min-w-0 w-full items-center gap-2 rounded-lg border border-border bg-muted/20 p-2 sm:rounded-xl sm:p-2.5"
+                          >
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                              <Music className="size-3.5 text-amber-500" />
+                            </div>
+
+                            <audio
+                              controls
+                              className="block h-8 min-w-0 w-full max-w-full"
+                            >
+                              <source src={url} />
+                              Your browser does not support audio playback.
+                            </audio>
+                          </div>
+                        ),
+                      )}
+                    </div>
+
+                  </div>
+                )}
+
+                {/* ====================================
+                    FILES
+                ==================================== */}
+
+                {files.length > 0 && (
+                  <div className="w-full space-y-2.5">
+
+                    <div className="flex items-center gap-1.5 font-mono text-[9px] text-muted-foreground sm:text-[10px]">
+                      <FileText className="size-3 shrink-0" />
+
+                      <span>
+                        Files ({files.length})
+                      </span>
+                    </div>
+
+                    <div className="w-full space-y-1.5">
+                      {files.map(
+                        (
+                          url: string,
+                          idx: number,
+                        ) => (
+                          <div
+                            key={idx}
+                            className="flex min-w-0 w-full flex-col gap-2 rounded-lg border border-border bg-muted/20 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:rounded-xl"
+                          >
+                            {/* FILE NAME */}
+
+                            <div className="flex min-w-0 items-center gap-2">
+                              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                                <FileText className="size-3.5 text-emerald-500" />
+                              </div>
+
+                              <span className="min-w-0 flex-1 truncate font-mono text-[9px] text-foreground/80 sm:text-[10px]">
+                                {getFileName(url)}
+                              </span>
+                            </div>
+
+                            {/* ACTIONS */}
+
+                            <div className="flex w-full shrink-0 items-center justify-end gap-1 sm:w-auto">
+
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex h-7 flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 text-[9px] font-mono text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:flex-none"
+                                title="Open file"
+                              >
+                                <ExternalLink className="size-3.5 shrink-0" />
+
+                                <span className="sm:hidden">
+                                  Open
+                                </span>
+                              </a>
+
+                              <a
+                                href={url}
+                                download
+                                className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                title="Download"
+                              >
+                                <Download className="size-3.5" />
+                              </a>
+
+                            </div>
+                          </div>
+                        ),
+                      )}
+                    </div>
+
+                  </div>
+                )}
+
+              </div>
             )}
-        </>
-    );
+          </div>
+        </section>
+      </div>
+
+      {/* ============================================
+          IMAGE PREVIEW MODAL
+      ============================================ */}
+
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex h-dvh w-full items-center justify-center bg-black/90 p-2 backdrop-blur-sm sm:p-4"
+          onClick={() =>
+            setSelectedImage(null)
+          }
+        >
+          <div
+            className="relative flex max-h-[94dvh] max-w-[98vw] items-center justify-center sm:max-h-[90dvh] sm:max-w-[92vw]"
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <img
+              src={selectedImage}
+              alt="Preview"
+              className="max-h-[90dvh] max-w-[96vw] rounded-lg object-contain shadow-2xl sm:max-h-[85dvh] sm:max-w-[90vw] sm:rounded-xl"
+            />
+
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedImage(null)
+              }
+              className="absolute right-1.5 top-1.5 flex size-8 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-colors hover:bg-black sm:-right-3 sm:-top-3"
+              title="Close preview"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

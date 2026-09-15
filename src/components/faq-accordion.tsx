@@ -1,9 +1,13 @@
-// components/faq-accordion.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, HelpCircle, MessageSquareQuote, ShieldCheck } from 'lucide-react';
+import {
+  ChevronDown,
+  HelpCircle,
+  MessageSquareQuote,
+  ShieldCheck,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface FaqItem {
@@ -45,86 +49,96 @@ const faqs: FaqItem[] = [
   },
 ];
 
-export function FaqSection() {
+const FaqSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleAccordion = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
+    setOpenIndex((currentIndex) =>
+      currentIndex === index ? null : index,
+    );
   };
 
   return (
     <section
       id="faq"
-      className="relative w-full bg-background py-24 px-6 sm:px-8 lg:px-12 text-foreground border-t border-border/60 transition-colors duration-300"
+      className="relative w-full overflow-hidden border-t border-border/60 bg-background px-4 py-16 text-foreground transition-colors duration-300 sm:px-6 sm:py-20 md:px-8 lg:px-12 lg:py-24 dark:bg-[#07080a] dark:text-[#fbf8f3]"
     >
-      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-        {/* বাম পাশ: স্টিকি টাইটেল ও হেল্প কার্ড */}
-        <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#991b1b]/30 bg-[#991b1b]/5 text-[#991b1b] dark:text-rose-400 text-xs font-mono tracking-wider">
+      <div className="pointer-events-none absolute -left-45 top-1/3 h-90 w-90 rounded-full bg-[#991b1b]/5 blur-[130px] dark:bg-red-950/15" />
+
+      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 lg:grid-cols-12 lg:gap-14">
+        <div className="space-y-5 lg:sticky lg:top-28 lg:col-span-5 lg:space-y-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#991b1b]/30 bg-[#991b1b]/5 px-3 py-1 text-[10px] font-mono tracking-wider text-[#991b1b] dark:text-rose-400 sm:text-xs">
             <HelpCircle className="size-3.5" />
             <span>KNOWLEDGE BASE</span>
           </div>
 
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground leading-[1.15]">
-            Frequently Asked <br className="hidden sm:inline" /> Questions
+          <h2 className="font-serif text-3xl font-semibold leading-[1.15] tracking-tight text-foreground sm:text-4xl lg:text-5xl dark:text-[#fbf8f3]">
+            Frequently Asked
+            <br className="hidden sm:inline" /> Questions
           </h2>
 
-          <p className="text-sm text-muted-foreground font-light leading-relaxed max-w-md">
-            Everything you need to know about zero-knowledge encryption, time-lock protocols, and cryptographic keys.
+          <p className="max-w-md text-xs font-light leading-relaxed text-muted-foreground sm:text-sm">
+            Everything you need to know about zero-knowledge encryption,
+            time-lock protocols, and cryptographic keys.
           </p>
 
-          {/* হেল্প কার্ড */}
-          <div className="p-6 rounded-2xl border border-border/70 bg-card/60 space-y-4 shadow-xs">
+          <div className="max-w-md space-y-3 rounded-2xl border border-border/70 bg-card/60 p-5 shadow-xs backdrop-blur-sm sm:p-6">
             <div className="flex items-center gap-3 text-[#991b1b] dark:text-rose-400">
               <MessageSquareQuote className="size-5" />
-              <span className="text-xs font-mono uppercase tracking-wider font-semibold">
+              <span className="text-[10px] font-mono font-semibold uppercase tracking-wider sm:text-xs">
                 Still have questions?
               </span>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+
+            <p className="text-xs leading-relaxed text-muted-foreground">
               Read our technical whitepaper or reach out to our team directly.
             </p>
+
             <Button 
               variant="outline"
               size="sm"
-              className="rounded-full text-xs font-mono h-9 px-4 cursor-pointer"
+              className="h-9 cursor-pointer rounded-full px-4 text-xs font-mono"
             >
-              <Link href="mailto:unseal.vault@gmail.com">Contact Support</Link>
+              <Link href="mailto:unseal.vault@gmail.com">
+                Contact Support
+              </Link>
             </Button>
           </div>
         </div>
 
-        {/* ডান পাশ: নম্বরযুক্ত অ্যাকর্ডিয়ন তালিকা */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className="space-y-3 lg:col-span-7 sm:space-y-4">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
+
             return (
               <div
                 key={faq.id}
-                className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
+                className={`overflow-hidden rounded-2xl border transition-all duration-300 ${
                   isOpen
-                    ? 'border-[#991b1b]/50 dark:border-rose-500/40 bg-card shadow-lg shadow-[#991b1b]/5'
+                    ? 'border-[#991b1b]/50 bg-card shadow-lg shadow-[#991b1b]/5 dark:border-rose-500/40'
                     : 'border-border/70 bg-card/40 hover:border-border'
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => toggleAccordion(index)}
-                  className="w-full py-5 px-6 flex items-center justify-between text-left gap-4 cursor-pointer select-none"
+                  aria-expanded={isOpen}
+                  className="flex w-full cursor-pointer select-none items-center justify-between gap-3 px-4 py-4 text-left sm:px-6 sm:py-5"
                 >
-                  <div className="flex items-center gap-3.5">
-                    <span className="font-mono text-xs text-[#991b1b] dark:text-rose-400 font-semibold">
+                  <div className="flex min-w-0 items-center gap-3 sm:gap-3.5">
+                    <span className="shrink-0 font-mono text-[10px] font-semibold text-[#991b1b] dark:text-rose-400 sm:text-xs">
                       {faq.id}
                     </span>
-                    <span className="font-medium text-sm sm:text-base text-foreground tracking-tight">
+
+                    <span className="text-sm font-medium tracking-tight text-foreground sm:text-base">
                       {faq.question}
                     </span>
                   </div>
 
                   <div
-                    className={`size-7 rounded-full border border-border flex items-center justify-center transition-transform duration-300 shrink-0 ${
+                    className={`flex size-7 shrink-0 items-center justify-center rounded-full border border-border transition-all duration-300 ${
                       isOpen
-                        ? 'rotate-180 bg-[#991b1b]/10 text-[#991b1b] dark:text-rose-400 border-[#991b1b]/30'
+                        ? 'rotate-180 border-[#991b1b]/30 bg-[#991b1b]/10 text-[#991b1b] dark:text-rose-400'
                         : 'text-muted-foreground'
                     }`}
                   >
@@ -133,20 +147,24 @@ export function FaqSection() {
                 </button>
 
                 {isOpen && (
-                  <div className="px-6 pb-6 pt-1 text-sm text-muted-foreground leading-relaxed font-light border-t border-border/40 pl-12">
-                    <p>{faq.answer}</p>
+                  <div className="border-t border-border/40 px-4 pb-5 pt-4 pl-12 sm:px-6 sm:pb-6 sm:pl-16">
+                    <p className="text-xs font-light leading-relaxed text-muted-foreground sm:text-sm">
+                      {faq.answer}
+                    </p>
                   </div>
                 )}
               </div>
             );
           })}
 
-          <div className="pt-4 flex items-center gap-2 text-xs font-mono text-muted-foreground">
-            <ShieldCheck className="size-4 text-[#991b1b] dark:text-rose-400" />
-            <span>Audited & verified zero-knowledge protocol</span>
+          <div className="flex items-center gap-2 px-1 pt-2 text-[9px] font-mono text-muted-foreground sm:pt-3 sm:text-xs">
+            <ShieldCheck className="size-4 shrink-0 text-[#991b1b] dark:text-rose-400" />
+            <span>Audited &amp; verified zero-knowledge protocol</span>
           </div>
         </div>
       </div>
     </section>
   );
-}
+};
+
+export default FaqSection;

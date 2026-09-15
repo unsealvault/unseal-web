@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import { useUser } from '@/providers/user.provider';
-import { usePathname, useRouter } from 'next/navigation'; 
+import { usePathname, useRouter } from 'next/navigation';
 import { protectedRoutes } from '@/constant';
 import { logout } from '@/actions/auth';
 
@@ -74,7 +74,7 @@ export function AvatarDropdown() {
               alt={user?.name}
               className="object-cover"
             />
-            <AvatarFallback className="bg-red-900/50 text-muted-foreground font-medium text-xs">
+            <AvatarFallback className="bg-red-900/50 text-zinc-200 font-medium text-xs">
               {initials}
             </AvatarFallback>
           </Avatar>
