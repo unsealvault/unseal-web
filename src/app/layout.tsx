@@ -4,6 +4,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 // import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css"; 
 import { Providers } from "@/providers";
+import Script from "next/script";
 
 // Inter Sans Font
 const inter = Inter({
@@ -36,6 +37,10 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <Script
+          src="https://assets.lemonsqueezy.com/lemon.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useUser } from '@/providers/user.provider';
@@ -10,10 +10,13 @@ import ReusableForm from '@/components/reuse/ReusableForm';
 import { FormInput } from '@/components/reuse/form-input';
 import { useLogin } from '@/hooks/use-auth';
 
-const LoginPage = () => {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const redirect = searchParams.get("redirect");
+type LoginPageProps = {
+  redirect?: string;
+};
+
+
+const LoginPage = ({ redirect }: LoginPageProps) => {
+    const router = useRouter(); 
 
     const [isMagicLink, setIsMagicLink] = useState(false);
     const [error, setError] = useState<string | null>(null);

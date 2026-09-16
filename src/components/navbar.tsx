@@ -61,9 +61,26 @@ export function Navbar() {
           {/* LOGO */}
           <Link href="/" onClick={closeMobileMenu} className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3.5">
             <div className={`relative flex size-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 group-hover:scale-105 ${homeTopNavbar ? 'border-rose-400/40 bg-rose-500/10 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.25)]' : 'border-[#991b1b]/40 bg-[#991b1b]/10 text-[#991b1b] shadow-[0_0_15px_rgba(153,27,27,0.2)] dark:border-rose-500/40 dark:bg-rose-950/20 dark:text-rose-400'}`}>
-              <svg className="size-4.25 sm:size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                <path d="M9 10v2a3 3 0 0 0 6 0v-2" strokeWidth="2" />
+              <svg
+                className="size-4.25 sm:size-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {/* ১. চিঠির খামের আউটলাইন ও নিচের আর্চ (Envelope Base) */}
+                <path d="M3 7.5v6.5c0 5 9 8 9 8s9-3 9-8V7.5" />
+
+                {/* ২. চিঠির ওপরের মুখবন্ধ ফ্ল্যাপ (Envelope Flap Fold) */}
+                <path d="M3 7.5l9 6 9-6" />
+
+                {/* ৩. কেন্দ্রবিন্দুতে ওয়াক্স সিলমোহর বৃত্ত (Wax Seal Base) */}
+                <circle cx="12" cy="13.5" r="3.25" />
+
+                {/* ৪. সিলমোহরের ভেতরে থাকা মূল 'U' মনোগ্রাম */}
+                <path d="M10.8 12.5v1.2a1.2 1.2 0 0 0 2.4 0v-1.2" strokeWidth="1.6" />
               </svg>
             </div>
 

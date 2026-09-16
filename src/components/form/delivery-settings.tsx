@@ -29,10 +29,20 @@ export function DeliverySettings({
   onEmailChange,
   onCustomDateChange,
 }: DeliverySettingsProps) {
+  // আগামীকালকের তারিখ নিরাপদভাবে বের করা (ক্যালেন্ডারের সর্বনিম্ন তারিখের জন্য)
+  const getTomorrowString = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const day = String(tomorrow.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   return (
-    <div className="w-full space-y-3">
+    <div className="-mt-5 w-full space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full items-start">
-        {/* Duration */}
+        {/* Duration Dropdown */}
         <div className="space-y-1.5 w-full">
           <label className="text-[11px] font-mono uppercase tracking-wider text-white/50 block">
             Unseal after
@@ -41,7 +51,10 @@ export function DeliverySettings({
           <Select
             value={duration}
             onValueChange={(value) => {
-              if (value !== null) onDurationChange(value);
+              // নিশ্চিতভাবে স্ট্রিং ভ্যালু হ্যান্ডেল করা
+              if (value) {
+                onDurationChange(value);
+              }
             }}
           >
             <SelectTrigger
@@ -105,7 +118,7 @@ export function DeliverySettings({
           </Select>
         </div>
 
-        {/* Email */}
+        {/* Destination Email */}
         <div className="space-y-1.5 w-full">
           <label className="text-[11px] font-mono uppercase tracking-wider text-white/50 block">
             {audience === 'self'
@@ -129,7 +142,7 @@ export function DeliverySettings({
         </div>
       </div>
 
-      {/* Custom Date */}
+      {/* Specific / Custom Date Picker */}
       {duration === 'custom' && (
         <div className="w-full space-y-1.5 pt-1 animate-in fade-in-50 duration-200">
           <div className="flex items-center justify-between">
@@ -145,16 +158,14 @@ export function DeliverySettings({
 
           <Input
             type="date"
-            required
-            min={
-              new Date(Date.now() + 86400000)
-                .toISOString()
-                .split('T')[0]
-            }
+            required={duration === 'custom'}
+            min={getTomorrowString()}
             value={customDate}
-            onChange={(e) => onCustomDateChange(e.target.value)}
+            onChange={(e) => {
+              onCustomDateChange(e.target.value);
+            }}
             style={{ height: '44px' }}
-            className="w-full rounded-lg bg-white/5 border border-rose-900/40 focus-visible:border-rose-500/50 text-xs text-white cursor-pointer px-3 box-border scheme-dark"
+            className="w-full rounded-lg bg-white/5 border border-rose-900/40 focus-visible:border-rose-500/50 text-xs text-white cursor-pointer px-3 box-border [color-scheme:dark]"
           />
         </div>
       )}

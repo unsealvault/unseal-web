@@ -1,4 +1,6 @@
-import { ArrowRight, Check } from 'lucide-react';
+'use client';
+
+import { ArrowRight, Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PricingPlan {
@@ -19,14 +21,14 @@ const PRICING_PLANS: PricingPlan[] = [
     price: '$0',
     frequency: 'Free forever',
     description:
-      'Perfect for sending encrypted thoughts and letters to your near future.',
+      'Perfect for sending encrypted thoughts and near-future reflections.',
     badge: null,
     features: [
-      'Text letters up to 3 years ahead',
-      'Client-side AES-256 encryption',
-      'Delivery to self or loved ones',
-      'Public or Private Vault selection',
-      'Zero ads & strict privacy',
+      'Schedule delivery up to 2 years ahead',
+      'Client-side AES-GCM-256 Zero-Knowledge encryption',
+      '1 file of each format (Image, Audio, Video, Doc)',
+      'Deliver to future self or loved ones',
+      'Zero ads & complete data privacy',
     ],
     buttonText: 'Write a Letter',
     buttonHref: '/',
@@ -37,17 +39,17 @@ const PRICING_PLANS: PricingPlan[] = [
     price: '$2.99',
     frequency: 'One-time payment',
     description:
-      'Lock away memories for life milestones deep into the future.',
-    badge: 'Most Popular',
+      'Lock away milestone memories deep into your distant future.',
+    badge: 'Extended Vault',
     features: [
-      '5 to 10+ years extended scheduling',
+      'Extended scheduling: 3, 5 to 10+ years ahead',
+      'Full media unlocked (5 Images, 3 Audios, 2 Videos, 5 Files)',
       'Automated scheduler infrastructure maintenance',
-      'Up to 5 attached media files (Free launch access)',
-      'Immutable cryptographic time lock',
-      'No recurring subscriptions',
+      'Immutable cryptographic time-lock guarantee',
+      'No recurring annual charges or subscriptions',
     ],
-    buttonText: 'Unlock Long-Term Vault',
-    buttonHref: 'https://unseal.lemonsqueezy.com/buy/vault-pass',
+    buttonText: 'Unlock Vault Pass',
+    buttonHref: 'https://unseal.lemonsqueezy.com/checkout/buy/18fdd167-2832-4644-bfa4-84e386db32fe',
     isPrimary: true,
   },
   {
@@ -60,6 +62,7 @@ const PRICING_PLANS: PricingPlan[] = [
     features: [
       'Fuel automated cron runners & email APIs',
       'Support independent, tracker-free software',
+      'Keep the core platform open and accessible',
       'Buy the developer a warm cup of coffee',
     ],
     buttonText: 'Buy Us a Coffee',
@@ -71,6 +74,7 @@ const PRICING_PLANS: PricingPlan[] = [
 const PricingSection = () => {
   return (
     <section className="relative w-full overflow-hidden border-t border-border/60 bg-background px-4 py-16 text-foreground transition-colors duration-300 sm:px-6 sm:py-20 md:px-8 lg:px-12 lg:py-24 dark:bg-[#07080a] dark:text-[#fbf8f3]">
+      {/* সিনেমাটিক অ্যাম্বিয়েন্ট গ্লো */}
       <div className="pointer-events-none absolute left-1/2 top-24 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-[#991b1b]/5 blur-[120px] dark:bg-red-950/15 sm:h-[400px] sm:w-[400px]" />
 
       <div className="relative z-10 mx-auto max-w-6xl">
@@ -85,8 +89,7 @@ const PricingSection = () => {
 
           <p className="mx-auto max-w-md text-xs leading-relaxed text-muted-foreground sm:text-sm">
             Unseal does not sell your personal data or run tracking ads. Our
-            core services remain free, sustained by micro-payments and
-            community backing.
+            core delivery remains free, sustained by long-term milestone passes and community backing.
           </p>
         </div>
 
@@ -101,7 +104,8 @@ const PricingSection = () => {
               }`}
             >
               {plan.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#991b1b] px-3 py-1 text-[9px] font-mono font-semibold uppercase tracking-wider text-white shadow-md">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#991b1b] px-3 py-1 text-[9px] font-mono font-semibold uppercase tracking-wider text-white shadow-md flex items-center gap-1">
+                  {plan.isPrimary && <Sparkles className="size-2.5" />}
                   {plan.badge}
                 </span>
               )}
@@ -173,7 +177,7 @@ const PricingSection = () => {
 
         <div className="mt-8 text-center">
           <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground sm:text-[10px]">
-            Secure payments · No recurring charges · Privacy first
+            Secure payments · Zero recurring fees · Zero-Knowledge privacy
           </p>
         </div>
       </div>

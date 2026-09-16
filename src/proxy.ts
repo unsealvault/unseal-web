@@ -10,7 +10,7 @@ const roleBasedRoutes = {
   ADMIN: [/^\/admin/],
 };
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Skip expensive API calls for public auth routes if unauthenticated, 

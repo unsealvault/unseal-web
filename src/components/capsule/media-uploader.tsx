@@ -1,3 +1,4 @@
+// components/media-uploader.tsx
 'use client';
 
 import { ChangeEvent, useRef } from 'react';
@@ -12,15 +13,23 @@ import {
 interface MediaUploaderProps {
   attachedFiles: File[];
   onFilesChange: (files: File[]) => void;
+  isLongTerm?: boolean; // ২ বছরের বেশি হলে true পাস হবে
 }
 
 type MediaType = 'image' | 'audio' | 'video' | 'file';
+
+// ১০ জিবি ক্লাউড স্টোরেজ বাঁচাতে সাইজ লিমিট
+const SIZE_LIMITS = {
+  video: 15 * 1024 * 1024, // ১৫ MB
+  audio: 10 * 1024 * 1024, // ১০ MB
+  file: 5 * 1024 * 1024,   // ৫ MB
+  image: 10 * 1024 * 1024, // ১০ MB
+};
 
 const MEDIA_CONFIG = {
   image: {
     label: 'Add Image',
     accept: 'image/jpeg,image/png,image/webp,image/gif',
-    max: 5,
     icon: ImagePlus,
     color: 'text-blue-400',
     bg: 'bg-blue-500/10',
@@ -30,7 +39,6 @@ const MEDIA_CONFIG = {
   audio: {
     label: 'Add Audio',
     accept: 'audio/mpeg,audio/wav,audio/mp4,audio/x-m4a',
-    max: 3,
     icon: Music2,
     color: 'text-purple-400',
     bg: 'bg-purple-500/10',
@@ -40,7 +48,6 @@ const MEDIA_CONFIG = {
   video: {
     label: 'Add Video',
     accept: 'video/mp4,video/quicktime,video/webm',
-    max: 2,
     icon: Video,
     color: 'text-red-400',
     bg: 'bg-red-500/10',
@@ -50,7 +57,6 @@ const MEDIA_CONFIG = {
   file: {
     label: 'Add File',
     accept: '.pdf,.doc,.docx,.txt,.zip',
-    max: 5,
     icon: FileText,
     color: 'text-yellow-400',
     bg: 'bg-yellow-500/10',
@@ -89,12 +95,21 @@ function formatFileSize(bytes: number) {
 export function MediaUploader({
   attachedFiles,
   onFilesChange,
+  isLongTerm = false,
 }: MediaUploaderProps) {
   const inputRefs = {
     image: useRef<HTMLInputElement>(null),
     audio: useRef<HTMLInputElement>(null),
     video: useRef<HTMLInputElement>(null),
     file: useRef<HTMLInputElement>(null),
+  };
+
+  // ২ বছরের বেশি হলে ফুল লিমিট, ২ বছর বা তার কম হলে প্রতিটিতে ১টি করে
+  const dynamicLimits: Record<MediaType, number> = {
+    image: isLongTerm ? 5 : 1,
+    audio: isLongTerm ? 3 : 1,
+    video: isLongTerm ? 2 : 1,
+    file: isLongTerm ? 5 : 1,
   };
 
   const handleSelect = (
@@ -106,30 +121,51 @@ export function MediaUploader({
     if (!files.length) return;
 
     const config = MEDIA_CONFIG[type];
+    const maxLimit = dynamicLimits[type];
 
     const currentCount = attachedFiles.filter(
       (file) => getFileType(file) === type
     ).length;
 
-    const remaining = config.max - currentCount;
+    const remaining = maxLimit - currentCount;
 
     if (remaining <= 0) {
-      alert(
-        `${config.label.replace(
-          'Add ',
-          ''
-        )} limit is ${config.max} files.`
-      );
+      if (!isLongTerm) {
+        alert(
+          `Free plan allows 1 ${type}. Choose a delivery schedule over 2 years to unlock more slots!`
+        );
+      } else {
+        alert(
+          `${config.label.replace(
+            'Add ',
+            ''
+          )} limit is ${maxLimit} files.`
+        );
+      }
 
       event.target.value = '';
       return;
     }
 
-    const selectedFiles = files.slice(0, remaining);
+    // ফাইল সাইজ ভ্যালিডেশন
+    const validFiles: File[] = [];
+    for (const file of files) {
+      if (file.size > SIZE_LIMITS[type]) {
+        alert(
+          `"${file.name}" is too large! Maximum allowed size for ${type} is ${formatFileSize(
+            SIZE_LIMITS[type]
+          )}.`
+        );
+        continue;
+      }
+      validFiles.push(file);
+    }
 
-    if (files.length > remaining) {
+    const selectedFiles = validFiles.slice(0, remaining);
+
+    if (validFiles.length > remaining) {
       alert(
-        `You can add maximum ${config.max} ${type} file(s).`
+        `You can add maximum ${maxLimit} ${type} file(s).`
       );
     }
 
@@ -148,8 +184,8 @@ export function MediaUploader({
   };
 
   return (
-    <div className="-mt-7 space-y-3">
-      {/* Header */}
+    <div className="space-y-3">
+      {/* Header - আপনার আসল ডিজাইন */}
       <div>
         <h3 className="text-sm font-semibold tracking-wide text-white">
           Add Media
@@ -160,13 +196,14 @@ export function MediaUploader({
         </p>
       </div>
 
-      {/* Compact Buttons */}
+      {/* Compact Buttons - আপনার আসল ডিজাইন */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {(
           Object.keys(MEDIA_CONFIG) as MediaType[]
         ).map((type) => {
           const config = MEDIA_CONFIG[type];
           const Icon = config.icon;
+          const maxLimit = dynamicLimits[type];
 
           const count = attachedFiles.filter(
             (file) => getFileType(file) === type
@@ -178,7 +215,7 @@ export function MediaUploader({
                 ref={inputRefs[type]}
                 type="file"
                 accept={config.accept}
-                multiple
+                multiple={maxLimit > 1}
                 className="hidden"
                 onChange={(e) =>
                   handleSelect(type, e)
@@ -194,7 +231,7 @@ export function MediaUploader({
                   group flex w-full items-center gap-2.5
                   rounded-xl border border-white/10
                   bg-white/[0.035]
-                  px-3 py-2.5
+                  px-2.5 py-2.5
                   text-left
                   transition-all duration-200
                   hover:bg-white/[0.07]
@@ -221,7 +258,7 @@ export function MediaUploader({
                   </span>
 
                   <span className="mt-0.5 block text-[10px] text-white/35">
-                    {count}/{config.max}
+                    {count}/{maxLimit}
                   </span>
                 </span>
               </button>
@@ -230,7 +267,7 @@ export function MediaUploader({
         })}
       </div>
 
-      {/* Selected Files */}
+      {/* Selected Files - আপনার আসল ডিজাইন */}
       {attachedFiles.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-black/20 p-2.5">
           <div className="mb-2 flex items-center justify-between">
