@@ -18,7 +18,7 @@ export function LetterComposer({ content, setContent, audience }: LetterComposer
             ? 'Write what you cannot say today, but must be remembered tomorrow...'
             : 'Write a heartfelt note, a confession, or an unforgettable memory...'
         }
-        className="w-full min-h-40 dark:bg-muted/20 bg-muted/3 dark:border-border border-zinc-800 resize-none font-serif text-sm sm:text-base leading-relaxed p-3 focus-visible:ring-1 focus-visible:ring-[#991b1b]"
+        className="w-full text-white min-h-40 dark:bg-muted/20 bg-muted/3 dark:border-border border-zinc-800 resize-none font-serif text-sm sm:text-base leading-relaxed p-3 focus-visible:ring-1 focus-visible:ring-[#991b1b]"
         required
       />
       <div className="flex justify-end text-[10px] font-mono text-muted-foreground">

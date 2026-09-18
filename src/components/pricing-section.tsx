@@ -28,7 +28,7 @@ const PRICING_PLANS: PricingPlan[] = [
       'Client-side AES-GCM-256 Zero-Knowledge encryption',
       '1 file of each format (Image, Audio, Video, Doc)',
       'Deliver to future self or loved ones',
-      'Zero ads & complete data privacy',
+      'Complete data privacy',
     ],
     buttonText: 'Write a Letter',
     buttonHref: '/',
@@ -88,7 +88,7 @@ const PricingSection = () => {
           </h2>
 
           <p className="mx-auto max-w-md text-xs leading-relaxed text-muted-foreground sm:text-sm">
-            Unseal does not sell your personal data or run tracking ads. Our
+            Unseal does not sell your personal data. Our
             core delivery remains free, sustained by long-term milestone passes and community backing.
           </p>
         </div>

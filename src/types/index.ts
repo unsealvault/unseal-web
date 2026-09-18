@@ -22,7 +22,8 @@ export interface SealLetterData {
     images: string[];
     audio: string[];
     videos: string[];
-    files: string[];
+    files: string[]; 
+    paymentId?: string;
   };
 }
 
@@ -39,22 +40,6 @@ export interface UserLetter {
   images?: string[];
   audio?: string[];
   videos?: string[];
-  files?: string[];
-}
-
-export interface Capsule {
-  _id: string;
-  fingerprint: string;
-  title: string;
-  recipientEmail: string;
-  audience: 'self' | 'someone_else';
-  visibility: 'private' | 'public_anonymous';
-  createdAt: string;
-  deliverAt: string;
-  targetTimestamp: number;
-  totalDurationDays: number;
-  remainingDays: number;
-  status: 'locked' | 'unsealed';
-  hasAttachments: boolean;
-  cipherSize: string;
+  files?: string[]; 
+  paymentId?: string;
 }

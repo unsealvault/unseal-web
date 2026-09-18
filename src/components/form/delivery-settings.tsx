@@ -29,7 +29,6 @@ export function DeliverySettings({
   onEmailChange,
   onCustomDateChange,
 }: DeliverySettingsProps) {
-  // আগামীকালকের তারিখ নিরাপদভাবে বের করা (ক্যালেন্ডারের সর্বনিম্ন তারিখের জন্য)
   const getTomorrowString = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -131,13 +130,14 @@ export function DeliverySettings({
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
             required
+            // disabled={audience === 'self' && !!email}
             placeholder={
               audience === 'self'
                 ? 'your.email@address.com'
                 : 'recipient.email@address.com'
             }
             style={{ height: '44px' }}
-            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 text-xs text-white placeholder:text-white/40 box-border focus-visible:ring-1 focus-visible:ring-[#991b1b] focus-visible:border-[#991b1b]"
+            className="w-full rounded-lg bg-white/5 border border-white/10 px-3 text-xs text-white placeholder:text-white/40 box-border focus-visible:ring-1 focus-visible:ring-[#991b1b] focus-visible:border-[#991b1b] disabled:opacity-70 disabled:cursor-not-allowed"
           />
         </div>
       </div>

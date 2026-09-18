@@ -37,9 +37,9 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
-        <Script
-          src="https://assets.lemonsqueezy.com/lemon.js"
-          strategy="lazyOnload"
+          <Script
+          src="/lemon.js"
+          strategy="beforeInteractive"
         />
       </body>
     </html>

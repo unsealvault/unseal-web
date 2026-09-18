@@ -23,6 +23,7 @@ export const SEAL_LETTER_MUTATION = gql`
       audio
       videos
       files
+      paymentId
     }
   }
 `;
@@ -44,6 +45,7 @@ export const GET_MY_LETTERS_QUERY = gql`
       audio
       videos
       files
+      paymentId
     }
   }
 `;
@@ -65,6 +67,7 @@ export const GET_MY_LETTER_BY_ID = gql`
       userId
       videos
       visibility
+      paymentId
     }
   }
 `;

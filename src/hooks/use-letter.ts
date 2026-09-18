@@ -1,16 +1,21 @@
 "use client";
 
-import {GET_MY_LETTER_BY_ID, GET_MY_LETTERS_QUERY, GetMyLetterByIdResponse, GetMyLetterByIdVariables, SEAL_LETTER_MUTATION } from "@/graphql/letter";
+import {
+  GET_MY_LETTER_BY_ID,
+  GET_MY_LETTERS_QUERY,
+  GetMyLetterByIdResponse,
+  GetMyLetterByIdVariables,
+  SEAL_LETTER_MUTATION,
+} from "@/graphql/letter";
 import { SealLetterData, UserLetter } from "@/types";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { toast } from "sonner"; 
-
+import { toast } from "sonner";
 
 export const useSealLetter = () => {
-
-  const [sealLetterMutation, { loading: isLoading }] = useMutation<SealLetterData, any>(
-    SEAL_LETTER_MUTATION
-  );
+  const [sealLetterMutation, { loading: isLoading }] = useMutation<
+    SealLetterData,
+    any
+  >(SEAL_LETTER_MUTATION);
 
   const sealLetter = async (inputData: any) => {
     try {
@@ -20,13 +25,13 @@ export const useSealLetter = () => {
 
       const letter = response.data?.sealLetter;
 
-        // console.log("............",letter) 
+      console.log("............", letter);
 
       toast.success("Letter sealed into the vault!");
       return letter;
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to seal letter!");
-      throw err;
+    } catch (error) {
+      console.error("Failed to seal capsule:", error);
+      throw error; 
     }
   };
 
@@ -41,8 +46,8 @@ export const useMyLetters = () => {
   const { data, loading, error, refetch } = useQuery<MyLettersData>(
     GET_MY_LETTERS_QUERY,
     {
-      fetchPolicy: 'cache-and-network',
-    }
+      fetchPolicy: "cache-and-network",
+    },
   );
 
   return {
@@ -60,7 +65,7 @@ export function useMyLetterById(letterId: string) {
   >(GET_MY_LETTER_BY_ID, {
     variables: { id: letterId },
     skip: !letterId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: "cache-and-network",
   });
 
   return {
