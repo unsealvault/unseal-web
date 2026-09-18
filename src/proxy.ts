@@ -12,52 +12,58 @@ const roleBasedRoutes = {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // 1. Skip expensive API calls for public auth routes if unauthenticated, 
-  // or handle them cleanly.
   const isAuthRoute = AuthRoutes.includes(pathname);
 
-  try {
-    // Pass request headers/cookies so the backend can read the JWT token
-    const user = await getCurrentUser(request);
-    
-    console.log("Middleware user:", user?.email, user?.role || "No User");
+  const token = request.cookies.get("token")?.value || request.cookies.get("accessToken")?.value;
 
-    if (user && isAuthRoute) {
+  if (!token) {
+    if (isAuthRoute) {
+      return NextResponse.next();
+    }
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  try {
+    const user = await getCurrentUser(request);
+
+    if (!user) {
+      if (isAuthRoute) return NextResponse.next();
+      
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      const res = NextResponse.redirect(loginUrl);
+      res.cookies.delete("token");
+      res.cookies.delete("accessToken");
+      return res;
+    }
+
+    if (isAuthRoute) {
       const redirectPath = user.role === "ADMIN" ? "/admin" : "/dashboard";
       return NextResponse.redirect(new URL(redirectPath, request.url));
     }
 
-    if (isAuthRoute) {
-      return NextResponse.next();
-    }
-    
-    if (!user) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
     if (user?.role && roleBasedRoutes[user.role as Role]) {
       const routes = roleBasedRoutes[user.role as Role];
-
       if (routes.some((route) => pathname.match(route))) {
         return NextResponse.next();
       }
     }
 
     return NextResponse.redirect(new URL("/", request.url));
-
   } catch (error) {
     console.error("Middleware Auth Error:", error);
-    
-    // If it's already an auth route, let them stay on login/register
+
     if (isAuthRoute) {
       return NextResponse.next();
     }
 
     const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+    const res = NextResponse.redirect(loginUrl);
+    res.cookies.delete("token");
+    res.cookies.delete("accessToken");
+    return res;
   }
 }
 
