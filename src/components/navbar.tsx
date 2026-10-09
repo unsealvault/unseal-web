@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from './theme-toggle';
 import { AvatarDropdown } from './avatar-dropdown';
 import { useUser } from '@/providers/user.provider';
+import UnsealLogo from './UnsealLogo';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -59,42 +60,23 @@ export function Navbar() {
       <div className="mx-auto w-full max-w-362.5 px-3 pt-3 sm:px-5 sm:pt-4 md:px-6 lg:px-8 xl:px-10">
         <div className={`relative flex min-h-16 items-center justify-between rounded-2xl border px-3 backdrop-blur-xl transition-all duration-300 sm:min-h-17 sm:px-5 lg:px-6 ${homeTopNavbar ? 'border-white/10 bg-[#07080a]/70 text-white shadow-[0_8px_32px_rgba(0,0,0,0.45)]' : 'border-border/80 bg-background/90 text-foreground shadow-lg shadow-black/5 dark:border-white/10 dark:bg-[#07080a]/75 dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)]'}`}>
           {/* LOGO */}
-          <Link href="/" onClick={closeMobileMenu} className="group flex min-w-0 shrink-0 items-center gap-2.5 sm:gap-3.5">
-            <div className={`relative flex size-8 shrink-0 items-center justify-center rounded-lg border transition-all duration-300 group-hover:scale-105 ${homeTopNavbar ? 'border-rose-400/40 bg-rose-500/10 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.25)]' : 'border-[#991b1b]/40 bg-[#991b1b]/10 text-[#991b1b] shadow-[0_0_15px_rgba(153,27,27,0.2)] dark:border-rose-500/40 dark:bg-rose-950/20 dark:text-rose-400'}`}>
-              <svg
-                className="size-4.25 sm:size-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                {/* ১. চিঠির খামের আউটলাইন ও নিচের আর্চ (Envelope Base) */}
-                <path d="M3 7.5v6.5c0 5 9 8 9 8s9-3 9-8V7.5" />
-
-                {/* ২. চিঠির ওপরের মুখবন্ধ ফ্ল্যাপ (Envelope Flap Fold) */}
-                <path d="M3 7.5l9 6 9-6" />
-
-                {/* ৩. কেন্দ্রবিন্দুতে ওয়াক্স সিলমোহর বৃত্ত (Wax Seal Base) */}
-                <circle cx="12" cy="13.5" r="3.25" />
-
-                {/* ৪. সিলমোহরের ভেতরে থাকা মূল 'U' মনোগ্রাম */}
-                <path d="M10.8 12.5v1.2a1.2 1.2 0 0 0 2.4 0v-1.2" strokeWidth="1.6" />
-              </svg>
+          <Link href="/" onClick={closeMobileMenu} className="group flex shrink-0 items-center gap-2.5 sm:gap-3.5">
+           <div className="relative size-12 ">
+              <UnsealLogo />
             </div>
 
-            <div className="min-w-0 leading-none">
-              <div className={`flex items-baseline font-serif text-xl font-semibold sm:text-2xl ${homeTopNavbar ? 'text-white' : 'text-foreground'}`}>
-                <span>Unseal</span>
-                <span className={`ml-0.5 size-1.5 rounded-full ${homeTopNavbar ? 'bg-rose-400' : 'bg-[#991b1b] dark:bg-rose-500'}`} />
-              </div>
 
-              <p className={`mt-1 hidden truncate text-[7px] font-mono tracking-[0.25em] xs:block sm:text-[8px] sm:tracking-[0.32em] ${homeTopNavbar ? 'text-white/40' : 'text-muted-foreground/80 dark:text-white/40'}`}>
-                Digital Time Capsule
+            <div>
+              <span className="text-xl sm:text-2xl font-extrabold tracking-tight transition-colors text-[#991b1b] dark:text-rose-500">
+                UnSeal
+              </span>
+              <p className="text-[11px] sm:text-xs text-muted-foreground font-light">
+                Your thoughts. Forever.
               </p>
             </div>
           </Link>
+
+          
 
           {/* DESKTOP NAVIGATION */}
           <nav className="hidden items-center gap-6 lg:flex xl:gap-8">

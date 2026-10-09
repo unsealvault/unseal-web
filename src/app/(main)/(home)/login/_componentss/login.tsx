@@ -11,12 +11,12 @@ import { FormInput } from '@/components/reuse/form-input';
 import { useLogin } from '@/hooks/use-auth';
 
 type LoginPageProps = {
-  redirect?: string;
+    redirect?: string;
 };
 
 
 const LoginPage = ({ redirect }: LoginPageProps) => {
-    const router = useRouter(); 
+    const router = useRouter();
 
     const [isMagicLink, setIsMagicLink] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -49,7 +49,7 @@ const LoginPage = ({ redirect }: LoginPageProps) => {
             </div>
 
             {/* Main Container */}
-            <div className="relative z-10 w-full max-w-md mx-auto px-4 pt-32 pb-20 flex-1 flex flex-col justify-center">
+            <div className="relative z-10 w-full max-w-lg mx-auto px-4 pt-32 pb-20 flex-1 flex flex-col justify-center">
                 <div className="rounded-2xl border border-border/80 bg-card text-card-foreground p-7 sm:p-9 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/60 space-y-6">
 
                     {/* Header */}
@@ -70,7 +70,7 @@ const LoginPage = ({ redirect }: LoginPageProps) => {
                     )}
 
                     {/* Login Method Switcher */}
-                    <div className="flex p-1 bg-muted/60 rounded-lg border border-border/60 text-xs font-medium">
+                    {/* <div className="flex p-1 bg-muted/60 rounded-lg border border-border/60 text-xs font-medium">
                         <button
                             type="button"
                             onClick={() => setIsMagicLink(false)}
@@ -88,7 +88,7 @@ const LoginPage = ({ redirect }: LoginPageProps) => {
                             <Sparkles className="size-3 text-[#991b1b] dark:text-rose-400" />
                             <span>Email Link</span>
                         </button>
-                    </div>
+                    </div> */}
 
                     <ReusableForm onSubmit={onSubmit}>
                         <div className="space-y-4">
@@ -102,7 +102,6 @@ const LoginPage = ({ redirect }: LoginPageProps) => {
 
                             {!isMagicLink && (
                                 <div className="space-y-2">
-                                    
                                     <FormInput
                                         name="password"
                                         label="Password"
@@ -117,7 +116,7 @@ const LoginPage = ({ redirect }: LoginPageProps) => {
                                         </span>
                                         <Link
                                             href="/forgot-password"
-                                            className="text-[11px] text-muted-foreground hover:text-[#991b1b] dark:hover:text-rose-400 transition-colors"
+                                            className="py-2 text-[11px] text-muted-foreground hover:text-[#991b1b] dark:hover:text-rose-400 transition-colors"
                                         >
                                             Forgot password ?
                                         </Link>

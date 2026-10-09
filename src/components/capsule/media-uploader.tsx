@@ -7,23 +7,24 @@ import {
   Music2,
   Video,
   FileText,
-  X
+  X,
+  Lock,
 } from 'lucide-react';
 
 interface MediaUploaderProps {
   attachedFiles: File[];
   onFilesChange: (files: File[]) => void;
-  isLongTerm?: boolean; // ২ বছরের বেশি হলে true পাস হবে
+  isLongTerm?: boolean;
 }
 
 type MediaType = 'image' | 'audio' | 'video' | 'file';
 
-// ১০ জিবি ক্লাউড স্টোরেজ বাঁচাতে সাইজ লিমিট
+// Cloud storage বাঁচাতে size limit
 const SIZE_LIMITS = {
-  video: 15 * 1024 * 1024, // ১৫ MB
-  audio: 10 * 1024 * 1024, // ১০ MB
-  file: 5 * 1024 * 1024,   // ৫ MB
-  image: 10 * 1024 * 1024, // ১০ MB
+  video: 15 * 1024 * 1024, // 15 MB
+  audio: 10 * 1024 * 1024, // 10 MB
+  file: 5 * 1024 * 1024,   // 5 MB
+  image: 10 * 1024 * 1024, // 10 MB
 };
 
 const MEDIA_CONFIG = {
@@ -104,69 +105,82 @@ export function MediaUploader({
     file: useRef<HTMLInputElement>(null),
   };
 
-  // ২ বছরের বেশি হলে ফুল লিমিট, ২ বছর বা তার কম হলে প্রতিটিতে ১টি করে
+  /**
+   * ২ বছর বা কম:
+   * - Image: 1
+   * - Audio: locked
+   * - Video: locked
+   * - File: locked
+   *
+   * ২ বছরের বেশি:
+   * - Image: 5
+   * - Audio: 3
+   * - Video: 2
+   * - File: 5
+   */
   const dynamicLimits: Record<MediaType, number> = {
     image: isLongTerm ? 5 : 1,
-    audio: isLongTerm ? 3 : 1,
-    video: isLongTerm ? 2 : 1,
-    file: isLongTerm ? 5 : 1,
+    audio: isLongTerm ? 3 : 0,
+    video: isLongTerm ? 2 : 0,
+    file: isLongTerm ? 5 : 0,
   };
 
   const handleSelect = (
     type: MediaType,
-    event: ChangeEvent<HTMLInputElement>
+    event: ChangeEvent<HTMLInputElement>,
   ) => {
     const files = Array.from(event.target.files || []);
 
-    if (!files.length) return;
+    if (!files.length) {
+      return;
+    }
 
     const config = MEDIA_CONFIG[type];
     const maxLimit = dynamicLimits[type];
 
+    // Locked media type
+    if (maxLimit === 0) {
+      event.target.value = '';
+      return;
+    }
+
     const currentCount = attachedFiles.filter(
-      (file) => getFileType(file) === type
+      (file) => getFileType(file) === type,
     ).length;
 
     const remaining = maxLimit - currentCount;
 
     if (remaining <= 0) {
-      if (!isLongTerm) {
-        alert(
-          `Free plan allows 1 ${type}. Choose a delivery schedule over 2 years to unlock more slots!`
-        );
-      } else {
-        alert(
-          `${config.label.replace(
-            'Add ',
-            ''
-          )} limit is ${maxLimit} files.`
-        );
-      }
+      alert(
+        `${config.label.replace('Add ', '')} limit is ${maxLimit} file${maxLimit > 1 ? 's' : ''
+        }.`,
+      );
 
       event.target.value = '';
       return;
     }
 
-    // ফাইল সাইজ ভ্যালিডেশন
+    // File size validation
     const validFiles: File[] = [];
+
     for (const file of files) {
       if (file.size > SIZE_LIMITS[type]) {
         alert(
           `"${file.name}" is too large! Maximum allowed size for ${type} is ${formatFileSize(
-            SIZE_LIMITS[type]
-          )}.`
+            SIZE_LIMITS[type],
+          )}.`,
         );
+
         continue;
       }
+
       validFiles.push(file);
     }
 
     const selectedFiles = validFiles.slice(0, remaining);
 
     if (validFiles.length > remaining) {
-      alert(
-        `You can add maximum ${maxLimit} ${type} file(s).`
-      );
+      alert(`You can add maximum ${maxLimit} ${type} file(s).`);
     }
 
     onFilesChange([
@@ -179,13 +193,13 @@ export function MediaUploader({
 
   const removeFile = (index: number) => {
     onFilesChange(
-      attachedFiles.filter((_, i) => i !== index)
+      attachedFiles.filter((_, i) => i !== index),
     );
   };
 
   return (
     <div className="space-y-3">
-      {/* Header - আপনার আসল ডিজাইন */}
+      {/* Header */}
       <div>
         <h3 className="text-sm font-semibold tracking-wide text-white">
           Add Media
@@ -196,78 +210,106 @@ export function MediaUploader({
         </p>
       </div>
 
-      {/* Compact Buttons - আপনার আসল ডিজাইন */}
+      {/* Media Buttons */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {(
-          Object.keys(MEDIA_CONFIG) as MediaType[]
-        ).map((type) => {
-          const config = MEDIA_CONFIG[type];
-          const Icon = config.icon;
-          const maxLimit = dynamicLimits[type];
+        {(Object.keys(MEDIA_CONFIG) as MediaType[]).map(
+          (type) => {
+            const config = MEDIA_CONFIG[type];
+            const Icon = config.icon;
+            const maxLimit = dynamicLimits[type];
 
-          const count = attachedFiles.filter(
-            (file) => getFileType(file) === type
-          ).length;
+            const count = attachedFiles.filter(
+              (file) => getFileType(file) === type,
+            ).length;
 
-          return (
-            <div key={type}>
-              <input
-                ref={inputRefs[type]}
-                type="file"
-                accept={config.accept}
-                multiple={maxLimit > 1}
-                className="hidden"
-                onChange={(e) =>
-                  handleSelect(type, e)
-                }
-              />
+            const isLocked = maxLimit === 0;
+            const isLimitReached =
+              maxLimit > 0 && count >= maxLimit;
 
-              <button
-                type="button"
-                onClick={() =>
-                  inputRefs[type].current?.click()
-                }
-                className={`
-                  group flex w-full items-center gap-2.5
-                  rounded-xl border border-white/10
-                  bg-white/[0.035]
-                  px-2.5 py-2.5
-                  text-left
-                  transition-all duration-200
-                  hover:bg-white/[0.07]
-                  hover:shadow-lg
-                  ${config.border}
-                `}
-              >
-                <span
+            const isDisabled =
+              isLocked || isLimitReached;
+
+            return (
+              <div key={type}>
+                <input
+                  ref={inputRefs[type]}
+                  type="file"
+                  accept={config.accept}
+                  multiple={maxLimit > 1}
+                  disabled={isDisabled}
+                  className="hidden"
+                  onChange={(e) =>
+                    handleSelect(type, e)
+                  }
+                />
+
+                <button
+                  type="button"
+                  disabled={isDisabled}
+                  onClick={() => {
+                    if (!isDisabled) {
+                      inputRefs[type].current?.click();
+                    }
+                  }}
                   className={`
-                    flex size-9 shrink-0
-                    items-center justify-center
-                    rounded-lg
-                    ${config.bg}
+                    group flex w-full items-center gap-2.5
+                    rounded-xl border border-white/10
+                    bg-white/[0.035]
+                    px-2.5 py-2.5
+                    text-left
+                    transition-all duration-200
+
+                    ${isDisabled
+                      ? 'cursor-not-allowed opacity-35'
+                      : `
+                          hover:bg-white/[0.07]
+                          hover:shadow-lg
+                          ${config.border}
+                        `
+                    }
                   `}
                 >
-                  <Icon
-                    className={`h-4 w-4 ${config.color}`}
-                  />
-                </span>
+                  {/* Icon */}
+                  <span
+                    className={`
+                      relative flex size-9 shrink-0
+                      items-center justify-center
+                      rounded-lg
+                      ${config.bg}
+                    `}
+                  >
+                    <Icon
+                      className={`h-4 w-4 ${config.color}`}
+                    />
 
-                <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-normal text-white/90">
-                    {config.label}
+                    {/* Lock */}
+                    {isLocked && (
+                      <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full border border-black/30 bg-black/60">
+                        <Lock className="h-2.5 w-2.5 text-white/60" />
+                      </span>
+                    )}
                   </span>
 
-                  <span className="mt-0.5 block text-[10px] text-white/35">
-                    {count}/{maxLimit}
+                  {/* Label */}
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-xs font-normal text-white/90">
+                      {config.label}
+                    </span>
+
+                    <span className="mt-0.5 block text-[10px] text-white/35">
+                      {isLocked
+                        ? 'Locked'
+                        : `${count}/${maxLimit}`}
+                    </span>
                   </span>
-                </span>
-              </button>
-            </div>
-          );
-        })}
+                </button>
+              </div>
+            );
+          },
+        )}
       </div>
 
-      {/* Selected Files - আপনার আসল ডিজাইন */}
+      {/* Selected Files */}
       {attachedFiles.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-black/20 p-2.5">
           <div className="mb-2 flex items-center justify-between">
@@ -276,7 +318,7 @@ export function MediaUploader({
             </span>
 
             <span className="text-[10px] text-white/30">
-              {attachedFiles.length}/15
+              {attachedFiles.length}/{isLongTerm ? 15 : 1}
             </span>
           </div>
 
@@ -289,8 +331,9 @@ export function MediaUploader({
               return (
                 <div
                   key={`${file.name}-${index}`}
-                  className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/2.5 px-2.5 py-2"
+                  className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/[0.025] px-2.5 py-2"
                 >
+                  {/* File Icon */}
                   <span
                     className={`
                       flex h-7 w-7 shrink-0
@@ -304,6 +347,7 @@ export function MediaUploader({
                     />
                   </span>
 
+                  {/* File Info */}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs text-white/75">
                       {file.name}
@@ -314,6 +358,7 @@ export function MediaUploader({
                     </p>
                   </div>
 
+                  {/* Remove */}
                   <button
                     type="button"
                     onClick={() =>
@@ -331,4 +376,4 @@ export function MediaUploader({
       )}
     </div>
   );
-}
+};

@@ -1,10 +1,10 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
-// import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css"; 
 import { Providers } from "@/providers";
 import Script from "next/script";
+import { ReactNode } from "react";
 
 // Inter Sans Font
 const inter = Inter({
@@ -21,14 +21,14 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Unseal — Letters to the Future",
+  title: "Unseal — Letter to the Future",
   description: "Write encrypted letters to your future self.",
 };
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>

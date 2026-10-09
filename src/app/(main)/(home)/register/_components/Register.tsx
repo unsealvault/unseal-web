@@ -51,7 +51,7 @@ const Register = () => {
             </div>
 
             {/* Main Container */}
-            <div className="relative z-10 w-full max-w-md mx-auto px-4 pt-32 pb-20 flex-1 flex flex-col justify-center">
+            <div className="relative z-10 w-full max-w-lg mx-auto px-4 pt-32 pb-20 flex-1 flex flex-col justify-center">
                 <div className="rounded-2xl border border-border/80 bg-card text-card-foreground p-7 sm:p-9 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/60 space-y-6">
 
                     {/* Header */}
@@ -63,7 +63,7 @@ const Register = () => {
                         <h1 className="text-2xl font-serif font-medium tracking-tight text-foreground">
                             Create Account
                         </h1>
-                        <p className="text-xs sm:text-sm text-muted-foreground font-light px-3">
+                        <p className="text-[13px] text-muted-foreground font-light">
                             Store, protect, and track all your scheduled letters in one place.
                         </p>
                     </div>

@@ -1,32 +1,22 @@
 // components/footer.tsx
 import Link from "next/link";
+import UnsealLogo from "./UnsealLogo";
 
 export function Footer() {
   return (
     <footer className="w-full border-t border-border/40 bg-background text-foreground transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-10 sm:py-12">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8 text-center sm:text-left">
-          
+
           {/* বাম পাশ: লোগো ও ব্র্যান্ড স্লোগান */}
           <Link href="/" className="flex items-center gap-3.5 group">
-            <div className="relative size-9 flex items-center justify-center rounded-xl border border-[#991b1b]/40 dark:border-rose-500/40 bg-[#991b1b]/10 dark:bg-rose-950/20 text-[#991b1b] dark:text-rose-400 shadow-[0_0_15px_rgba(153,27,27,0.2)] transition-transform duration-300 group-hover:scale-105">
-              <svg
-                className="size-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                <path d="M9 10v2a3 3 0 0 0 6 0v-2" strokeWidth="2" />
-              </svg>
+            <div className="relative size-12 ">
+              <UnsealLogo />
             </div>
 
             <div>
-              <span className="font-serif text-xl sm:text-2xl font-normal tracking-tight text-foreground transition-colors group-hover:text-[#991b1b] dark:group-hover:text-rose-400">
-                Unseal
+              <span className="text-xl sm:text-2xl font-extrabold tracking-tight transition-colors text-[#991b1b] dark:text-rose-500">
+                UnSeal
               </span>
               <p className="text-[11px] sm:text-xs text-muted-foreground font-light">
                 Your thoughts. Forever.
@@ -36,7 +26,7 @@ export function Footer() {
 
           {/* ডান পাশ: সোশ্যাল আইকন, লিগ্যাল লিংক ও কপিরাইট */}
           <div className="flex flex-col sm:items-end items-center gap-3.5">
-            
+
             {/* সোশ্যাল মিডিয়া আইকনসমূহ */}
             <div className="flex items-center gap-4 text-muted-foreground">
               {/* X (Twitter) */}

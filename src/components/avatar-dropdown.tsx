@@ -62,23 +62,20 @@ export function AvatarDropdown() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <button
-          type="button"
-          className="relative flex rounded-full focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-transform active:scale-95 cursor-pointer"
-        >
-          {/* সরাসরি Avatar বসিয়ে দেওয়া হয়েছে, পেছনের লাল গ্রেডিয়েন্ট র‍্যাপার div-টি বাদ দেওয়া হয়েছে */}
-          <Avatar className="size-9 sm:size-10 border-2 border-amber-800/80">
-            <AvatarImage
-              src="{user?.profilePhoto}"
-              alt={user?.name}
-              className="object-cover"
-            />
-            <AvatarFallback className="bg-red-900/50 text-zinc-200 font-medium text-xs">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-        </button>
+      <DropdownMenuTrigger
+        className="relative flex rounded-full focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-transform active:scale-95 cursor-pointer"
+      >
+        <Avatar className="size-9 sm:size-10 border-2 border-amber-800/80">
+          <AvatarImage
+            src={user?.profilePhoto}
+            alt={user?.name}
+            className="object-cover"
+          />
+
+          <AvatarFallback className="bg-red-900/50 text-zinc-200 font-medium text-xs">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
@@ -97,10 +94,7 @@ export function AvatarDropdown() {
                 </span>
 
                 <span
-                  className="
-      text-[9px] font-mono uppercase tracking-wide
-      bg-amber-500/10
-      text-amber-700 dark:text-amber-300
+                  className="text-[9px] font-mono uppercase tracking-wide       bg-amber-500/10       text-amber-700 dark:text-amber-300
       px-1.5 py-0.5
       rounded-md
       border border-amber-500/20
