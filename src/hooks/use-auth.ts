@@ -35,22 +35,25 @@ export const useRegister = () => {
 };
 
 
-
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const client = useApolloClient(); // হুকটি কম্পোনেন্টের ভেতরে এভাবে কল করতে হবে
 
-  const login = async (email: string, password: string) => { 
-    
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
-      const result = await loginUser(email, password); 
-      const client = useApolloClient();
-      // console.log("Login result:", result.login.message);
-      toast.success(result?.login?.message,);
-      return result; 
+      const result = await loginUser(email, password);
+      
+      // সফলতার মেসেজ দেখানো
+      toast.success(result?.login?.message || "Logged in successfully!");
+      
+      // Apollo Store রিসেট করা যাতে পুরানো ক্যাশ ক্লিয়ার হয়ে যায়
       await client.resetStore();
+      
+      return result; 
     } catch (err: any) {
       const message = err.message || "Login failed!";
-      toast.error(message,);
+      toast.error(message);
       throw err;
     } finally {
       setIsLoading(false);
