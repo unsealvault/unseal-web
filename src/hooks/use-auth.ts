@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';   
-import { useQuery } from "@apollo/client/react"; 
+import { useApolloClient, useQuery } from "@apollo/client/react"; 
 import { IUser } from '@/types'; 
 import { GET_ME, loginUser, registerUser } from '@/graphql/auth';
 
@@ -43,9 +43,11 @@ export const useLogin = () => {
     
     try {
       const result = await loginUser(email, password); 
+      const client = useApolloClient();
       // console.log("Login result:", result.login.message);
       toast.success(result?.login?.message,);
       return result; 
+      await client.resetStore();
     } catch (err: any) {
       const message = err.message || "Login failed!";
       toast.error(message,);
