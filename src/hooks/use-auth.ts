@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';   
-import { useApolloClient, useQuery } from "@apollo/client/react"; 
+import { useQuery } from "@apollo/client/react"; 
 import { IUser } from '@/types'; 
 import { GET_ME, loginUser, registerUser } from '@/graphql/auth';
 
@@ -35,25 +35,20 @@ export const useRegister = () => {
 };
 
 
+
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const client = useApolloClient(); // হুকটি কম্পোনেন্টের ভেতরে এভাবে কল করতে হবে
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
+  const login = async (email: string, password: string) => { 
+    
     try {
-      const result = await loginUser(email, password);
-      
-      // সফলতার মেসেজ দেখানো
-      toast.success(result?.login?.message || "Logged in successfully!");
-      
-      // Apollo Store রিসেট করা যাতে পুরানো ক্যাশ ক্লিয়ার হয়ে যায়
-      await client.resetStore();
-      
+      const result = await loginUser(email, password); 
+      // console.log("Login result:", result.login.message);
+      toast.success(result?.login?.message,);
       return result; 
     } catch (err: any) {
       const message = err.message || "Login failed!";
-      toast.error(message);
+      toast.error(message,);
       throw err;
     } finally {
       setIsLoading(false);
