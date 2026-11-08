@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation"; 
+import { useParams } from "next/navigation";
 import { decryptLetterContent } from "@/lib/crypto";
 import { Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,70 +35,73 @@ export default function UnsealLetterPage() {
   } | null>(null);
 
   // ১. ব্যাকএন্ড থেকে ডেটা ফেচ
-  useEffect(() => {
-    async function fetchLetter() {
-      if (!letterId) return;
+//   useEffect(() => {
+//     async function fetchLetter() {
+//       if (!letterId) return;
 
-      try {
-        setLoading(true);
-        setError(null);
+//       try {
+//         setLoading(true);
+//         setError(null);
 
-        const graphqlUrl =
-          process.env.NEXT_PUBLIC_GRAPHQL_URL ||
-          "http://localhost:4001/graphql";
-        const res = await fetch(graphqlUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            query: `
-              query GetLetter($id: String!) {
-  getLetterById(id: $id) {
-    id
-    recipientEmail
-    status
-    encryptedContent
-    images
-    audio
-    videos
-    files
-    deliverAt
-  }
-}
-            `,
-            variables: { id: letterId },
-          }),
-        });
+//         const graphqlUrl =
+//           process.env.NEXT_PUBLIC_GRAPHQL_URL 
+//           // ||           "http://localhost:4001/graphql"
+//           ;
+//         const res = await fetch(
+//           // graphqlUrl, 
+//           {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({
+//             query: `
+//               query GetLetter($id: String!) {
+//   getLetterById(id: $id) {
+//     id
+//     recipientEmail
+//     status
+//     encryptedContent
+//     images
+//     audio
+//     videos
+//     files
+//     deliverAt
+//   }
+// }
+//             `,
+//             variables: { id: letterId },
+//           }),
+//         });
 
-        const result = await res.json();
+//         const result = await res.json();
 
-        if (result.errors && result.errors.length > 0) {
-          setError(
-            result.errors[0]?.message || "Backend GraphQL error occurred.",
-          );
-          return;
-        }
+//         if (result.errors && result.errors.length > 0) {
+//           setError(
+//             result.errors[0]?.message || "Backend GraphQL error occurred.",
+//           );
+//           return;
+//         }
 
-        if (result.data?.getLetterById) {
-          const fetched = result.data.getLetterById;
-          setLetterData({
-            ...fetched,
-            mediaUrls: fetched.mediaUrls || [],
-          });
-          setSecretKeyInput(fetched.recipientEmail || "");
-        } else {
-          setError("Letter not found in the vault (Invalid ID).");
-        }
-      } catch (e: any) {
-        setError(
-          "Failed to connect to the sealed vault server. Check if port 4001 is running.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
+//         if (result.data?.getLetterById) {
+//           const fetched = result.data.getLetterById;
+//           setLetterData({
+//             ...fetched,
+//             mediaUrls: fetched.mediaUrls || [],
+//           });
+//           setSecretKeyInput(fetched.recipientEmail || "");
+//         } else {
+//           setError("Letter not found in the vault (Invalid ID).");
+//         }
+//       } catch (e: any) {
+//         setError(
+//           "Failed to connect to the sealed vault server. Check if port 4001 is running.",
+//         );
+//       } finally {
+//         setLoading(false);
+//       }
+//     }
 
-    fetchLetter();
-  }, [letterId]);
+//     fetchLetter();
+//   }, [letterId]);
 
   // ২. ব্রাউজারে ডিক্রিপশন (Zero-Knowledge)
   const handleDecrypt = async (e: React.FormEvent) => {

@@ -1,5 +1,9 @@
 // api/client.ts
-const GRAPHQL_ENDPOINT = "http://localhost:4001/graphql";
+
+import envconfig from "@/config/envConfig";
+
+
+const GRAPHQL_ENDPOINT = envconfig.graphqlApi as string;
 
 export const graphqlRequest = async (query: string, variables: Record<string, any> = {}) => {
   const res = await fetch(GRAPHQL_ENDPOINT, {

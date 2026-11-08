@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getCurrentUser } from "./actions/auth";
 
-const AuthRoutes = ["/login", "/register", "/forgot-password"];
+const AuthRoutes = ["/login", "/register"];
 
 type Role = keyof typeof roleBasedRoutes;
 
@@ -71,7 +71,6 @@ export const config = {
   matcher: [
     "/login",
     "/register",
-    "/forgot-password",
     "/dashboard/:path*",
     "/admin/:path*",
   ],

@@ -66,7 +66,7 @@ export const useGetCurrentUser = () => {
   });
 
   const userData = data?.me || null;
-  // console.log("use data from graphql hook-:", userData);
+  console.log("use data from graphql hook-:", userData);
   return {
     user: userData,      
     isLoading: loading,  

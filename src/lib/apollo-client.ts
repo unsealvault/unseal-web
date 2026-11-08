@@ -1,7 +1,8 @@
+import envconfig from '@/config/envConfig';
 import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 
 const httpLink = new HttpLink({
-  uri: 'https://api.unsealme.com/graphql',
+  uri: envconfig.graphqlApi,
   credentials: 'include',
 });
 

@@ -26,6 +26,8 @@ const UserProvider = ({ children }: { children: ReactNode }) => {
   // get user from graphql hook
   const { user: currentUser, isLoading, refetchMe } = useGetCurrentUser();
 
+  console.log("user from user.provider", user)
+
   useEffect(() => {
     // 1. isLoading end & user data exists (logged in)
     if (!isLoading && currentUser) {

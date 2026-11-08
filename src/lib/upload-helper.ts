@@ -1,6 +1,8 @@
 // frontend/src/lib/upload-helper.ts
-export async function uploadFileToR2(file: File): Promise<string> {
-  const graphqlEndpoint = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4001/graphql';
+import envconfig from "@/config/envConfig";
+
+export async function uploadFileToR2(file: File): Promise<string> { 
+  const graphqlEndpoint = envconfig.graphqlApi as string;
 
   // ১. ব্যাকএন্ড থেকে অনুমোদিত আপলোড লিংক নেওয়া
   const res = await fetch(graphqlEndpoint, {
