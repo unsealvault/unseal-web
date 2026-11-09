@@ -12,7 +12,7 @@ export const apolloServer = async () => {
   return new ApolloClient({
     ssrMode: true,
     link: new HttpLink({
-      uri: envconfig.graphqlApi,
+      uri: envconfig.internalGraphqlApi,
       headers: {
         authorization: token ? `Bearer ${token}` : "",
       },
